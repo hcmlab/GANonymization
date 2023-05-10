@@ -131,7 +131,6 @@ dmypy.json
 data/
 output/
 logs/
-models/
 .idea
 *.pth
 *.ckpt
