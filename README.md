@@ -3,6 +3,11 @@
 [[Paper](https://arxiv.org/abs/2305.02143)]
 [[Demo]()]
 
+We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities.
+Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on a generative adversarial network (GAN).
+The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes to increase the anonymity of the given individual face.
+Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and outperformed the state-of-the-art method in most categories.
+Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and multiple others. Here, it demonstrated reliable performance in removing these attributes.
 
 ## Quick Start
 The project was tested only with python version 3.8. Newer versions might work as well.
