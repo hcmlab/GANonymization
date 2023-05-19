@@ -26,7 +26,7 @@ pip install git+https://github.com/hcmlab/GANonymization
 ### Training
 You can either download a pre-trained GANonymization model:
 * [Trained for 25 epochs](https://mediastore.rz.uni-augsburg.de/get/NsLjQYey65/) (publication version)
-* [Trained for 50 epochs](https://mediastore.rz.uni-augsburg.de/get/Sfle_etB1D/)
+* [Trained for 50 epochs](https://mediastore.rz.uni-augsburg.de/get/Sfle_etB1D/) (demo version)
 
 Or train the GANonymization model yourself:
 ```bash
