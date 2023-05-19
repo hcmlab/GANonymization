@@ -45,7 +45,9 @@
 
         // --- GANonymization Model
         const model_file = "GANonymization.onnx";
-        const model_content = await fetch(model_file);
+        const model_content = await fetch(model_file, {
+            redirect: 'follow',
+        });
         const model_buffer = await model_content.arrayBuffer();
         // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
         const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
