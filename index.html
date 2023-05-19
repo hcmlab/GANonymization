@@ -45,8 +45,26 @@
 
         // --- GANonymization Model
         const model_file = "https://mediastore.rz.uni-augsburg.de/file/f9603535850862ddd68c29d99136c256/64673fd9/h4tBzledgV/GANonymization.onnx";
-        // const sessionOption = {executionProviders: ['wasm']};
-        const model = await ort.InferenceSession.create(model_file); //, sessionOption);
+        // const model_file = "https://mediastore.rz.uni-augsburg.de/get/h4tBzledgV/"
+        const model_content = await fetch(model_file, {
+            method: 'GET',
+            mode: 'cors',
+            referrerPolicy: "strict-origin-when-cross-origin",
+            credentials: "same-origin",
+            cache: "default",
+            redirect: 'follow',
+            integrity: "",
+            keepalive: false,
+            signal: undefined,
+            window: window,
+            headers: {
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Headers': '*'
+            }
+        });
+        const model_buffer = await model_content.arrayBuffer();
+        // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
+        const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
 
         // --- Setup Webcam
         var webcam_model = new Webcam(video, 'environment', canvasLandmarks);
