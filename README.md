@@ -1,7 +1,7 @@
 # GANonymization: A GAN-based Face Anonymization Framework for Preserving Emotional Expressions
 
 [[Paper](https://arxiv.org/abs/2305.02143)]
-[[Demo]()]
+[[Demo](https://hcmlab.github.io/GANonymization/)]
 
 We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities.
 Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on a generative adversarial network (GAN).
