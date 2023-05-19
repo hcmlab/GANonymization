@@ -42,6 +42,15 @@
         canvasLandmarks.height = window.innerHeight;
         canvasAnonymized.width = window.innerWidth;
         canvasAnonymized.height = window.innerHeight;
+        clearCanvas(ctxLandmarks);
+        clearCanvas(ctxAnonymized);
+
+        // --- Waiting text
+        const text = "Please wait while loading the model...";
+        ctxLandmarks.textAlign = 'center';
+        ctxLandmarks.fillStyle = 'white';
+        ctxLandmarks.font = "20px Arial";
+        ctxLandmarks.fillText(text, canvasLandmarks.width / 2, canvasLandmarks.height / 2);
 
         // --- GANonymization Model
         const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
@@ -105,10 +114,7 @@
         faceMesh.setOptions(solutionOptions);
         faceMesh.onResults(results => {
             // Clear window for next frame
-            ctxLandmarks.clearRect(0, 0, canvasLandmarks.width, canvasLandmarks.height);
-            ctxLandmarks.fillRect(0, 0, canvasLandmarks.width, canvasLandmarks.height);
-            ctxLandmarks.fillStyle = 'black';
-            ctxLandmarks.fill();
+            clearCanvas(ctxLandmarks);
 
             // Update facial landmarks
             if (results.multiFaceLandmarks.length > 0) {
@@ -167,10 +173,7 @@
 
                     // Run the ONNX model with the preprocessed input
                     model.run(input_feed).then(output => {
-                        ctxAnonymized.clearRect(0, 0, canvasAnonymized.width, canvasAnonymized.height);
-                        ctxAnonymized.fillRect(0, 0, canvasAnonymized.width, canvasAnonymized.height);
-                        ctxAnonymized.fillStyle = 'black';
-                        ctxAnonymized.fill();
+                        clearCanvas(ctxAnonymized);
                         // Postprocess the output data
                         const output_tag = model.outputNames[0];
                         const postprocessedData = postprocess(output[output_tag], image_size);
@@ -191,6 +194,15 @@
             image.src = canvasLandmarks.toDataURL();
             await faceMesh.send({image});
             requestAnimationFrame(predictWebcam);
+        }
+
+        function clearCanvas(ctx) {
+            const canvas = ctx.canvas;
+            // Clear window for next frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'black';
+            ctx.fill();
         }
     </script>
 </head>
@@ -222,7 +234,7 @@
     <h1>GANonymization</h1>
     <video id="webcam" autoplay playsinline width="1920" height="1080" class="d-none"></video>
     <canvas id="canvas-landmarks" style="z-index: -10;"></canvas>
-    <canvas id="canvas-anonymized" style="z-index: -10;"></canvas>
+    <canvas id="canvas-anonymized" style="z-index: -11;"></canvas>
     <div class="custom-checkbox">
         <input id="status"
                type="checkbox"
