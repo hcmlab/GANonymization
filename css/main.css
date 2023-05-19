@@ -1,0 +1,21 @@
+html {
+    overflow: hidden;
+}
+
+h1 {
+    position: absolute;
+    top: 2%;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 10vh;
+    font-family: "Code Pro";
+    text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+}
+
+canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}

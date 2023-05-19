@@ -1,0 +1,75 @@
+a {
+  text-decoration: none;
+  vertical-align: middle;
+  text-align: center;
+  line-height: 2;
+}
+
+p {
+  color: white;
+  position: relative;
+  left: -10px;
+  font-family: 'Lato';
+}
+
+#sidebar-right {
+  height: 50px;
+  position: fixed;
+  right: 0;
+  margin: 10px;
+}
+
+#sidebar-left {
+  height: 250px;
+  width: 10px;
+  position: fixed;
+  text-align: center;
+  padding: 10px;
+  margin-left: 10px;
+}
+
+p i {
+  left: 30px;
+  position: relative;
+  vertical-align: middle;
+  text-align: center;
+  font-size: 3vh;
+}
+
+.social {
+  margin-left: -175px;
+  width: 230px;
+  display: inline-table;
+  padding: 0;
+  height: 0;
+  background-color: rgba(128, 128, 128, 0.73);
+  -moz-transition-property: margin-left;
+  -moz-transition-duration: 0.2s;
+  -moz-transition-delay: 0.2s;
+  -ms-transition-property: margin-left;
+  -ms-transition-duration: 0.2s;
+  -ms-transition-delay: 0.2s;
+  -o-transition-property: margin-left;
+  -o-transition-duration: 0.2s;
+  -o-transition-delay: 0.2s;
+  -webkit-transition-property: margin-left;
+  -webkit-transition-duration: 0.2s;
+  -webkit-transition-delay: 0.2s;
+  box-shadow: 0px 0px 6px 0px #3E3D3D;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.social:hover {
+  margin-left: -30px;
+  width: 230px;
+  background-color: #3b5998;
+}
+
+.github:hover {
+  background-color: #24292f;
+}
+
+.arxiv:hover {
+  background-color: #b31b1b;
+}
