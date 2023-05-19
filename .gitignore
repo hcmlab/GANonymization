@@ -134,4 +134,3 @@ logs/
 .idea
 *.pth
 *.ckpt
-*.onnx

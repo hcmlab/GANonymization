@@ -44,8 +44,7 @@
         canvasAnonymized.height = window.innerHeight;
 
         // --- GANonymization Model
-        const model_file = "https://mediastore.rz.uni-augsburg.de/file/f9603535850862ddd68c29d99136c256/64673fd9/h4tBzledgV/GANonymization.onnx";
-        // const model_file = "https://mediastore.rz.uni-augsburg.de/get/h4tBzledgV/"
+        const model_file = "https://hcmlab.github.io/GANonymization/GANonymization.onnx";
         const model_content = await fetch(model_file, {
             method: 'GET',
             mode: 'cors',
