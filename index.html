@@ -44,23 +44,8 @@
         canvasAnonymized.height = window.innerHeight;
 
         // --- GANonymization Model
-        const model_file = "https://hcmlab.github.io/GANonymization/GANonymization.onnx";
-        const model_content = await fetch(model_file, {
-            method: 'GET',
-            mode: 'cors',
-            referrerPolicy: "strict-origin-when-cross-origin",
-            credentials: "same-origin",
-            cache: "default",
-            redirect: 'follow',
-            integrity: "",
-            keepalive: false,
-            signal: undefined,
-            window: window,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Headers': '*'
-            }
-        });
+        const model_file = "https://github.com/hcmlab/GANonymization/raw/demo/GANonymization.onnx";
+        const model_content = await fetch(model_file);
         const model_buffer = await model_content.arrayBuffer();
         // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
         const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
