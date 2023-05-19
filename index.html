@@ -44,7 +44,7 @@
         canvasAnonymized.height = window.innerHeight;
 
         // --- GANonymization Model
-        const model_file = "GANonymization.onnx";
+        const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
         const model_content = await fetch(model_file, {
             redirect: 'follow',
         });
