@@ -47,6 +47,7 @@
         const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
         const model_content = await fetch(model_file, {
             redirect: 'follow',
+            cache: 'force-cache'
         });
         const model_buffer = await model_content.arrayBuffer();
         // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
