@@ -39,7 +39,7 @@ class LabeledDataset(torch.utils.data.Dataset):
         file_names_found = [os.path.basename(f).split('-')[-1] for f in files_found]
         logger.debug(f'Files found: {len(file_names_found)}')
         # Extract base name from image_path in meta-data
-        self.meta_data['image_path'] = self.meta_data['image_path'].apply(lambda p: p.split('\\')[-1].split('/')[-1])
+        self.meta_data['image_path'] = self.meta_data['image_path'].apply(lambda p: p.split('/\')[-1].split('/')[-1])
         # Filter for all available images in files_found
         self.meta_data = self.meta_data[self.meta_data['image_path'].isin(file_names_found)]
         logger.debug(f'Files not available: {len(file_names_found) - len(self.meta_data)}')

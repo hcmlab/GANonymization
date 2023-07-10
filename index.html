@@ -25,9 +25,6 @@
     <script type="text/javascript"
             src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
     <script type="text/javascript" src="./javascript/webcam-easy.js"></script>
-    <script type="text/javascript" src="./javascript/ndarray-browser-min.js"></script>
-    <script type="text/javascript" src="./javascript/onnx_data_processing.js"></script>
-
 
     <script type="module">
         const image_size = 512;
@@ -38,68 +35,33 @@
         var ctxLandmarks = canvasLandmarks.getContext('2d');
         var canvasAnonymized = document.getElementById("canvas-anonymized");
         var ctxAnonymized = canvasAnonymized.getContext('2d');
+
+        // Setup canvas dimensions
         canvasLandmarks.width = window.innerWidth;
         canvasLandmarks.height = window.innerHeight;
         canvasAnonymized.width = window.innerWidth;
         canvasAnonymized.height = window.innerHeight;
+
+        // Clear canvases
         clearCanvas(ctxLandmarks);
         clearCanvas(ctxAnonymized);
 
-        // --- Waiting text
-        const text = "Please wait while loading the model...";
-        ctxLandmarks.textAlign = 'center';
-        ctxLandmarks.fillStyle = 'white';
-        ctxLandmarks.font = "20px Arial";
-        ctxLandmarks.fillText(text, canvasLandmarks.width / 2, canvasLandmarks.height / 2);
-
-        // --- GANonymization Model
-        const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
-        const model_content = await fetch(model_file, {
-            redirect: 'follow',
-            cache: 'force-cache'
-        });
-        const model_buffer = await model_content.arrayBuffer();
-        // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
-        const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
-
-        // --- Setup Webcam
-        var webcam_model = new Webcam(video, 'environment', canvasLandmarks);
-        webcam_model.info().then(function (inputDeviceInfos) {
-            const dropdownMenu = document.getElementById("dropdown-menu");
-            var items = "";
-            for (var i = 0; i < inputDeviceInfos.length; i++) {
-                const deviceInfo = inputDeviceInfos[i];
-                items += '<button id="button-' + i + '" class="dropdown-item">' + deviceInfo.label + '</button>';
-                dropdownMenu.innerHTML = items;
-                const button = document.getElementById('button-' + i);
-                button.addEventListener('click', function () {
-                    webcam_model.start(true, deviceInfo.deviceId).catch(err => {
-                        console.log(err);
-                    });
-                });
-            }
-        });
-        webcam_model.start().catch(err => {
-            console.log(err);
-        });
-        video.requestVideoFrameCallback(predictWebcam);
-
-        // --- Type Button
+        // Type Button event listener
         status.addEventListener('change', function () {
+            let dNone = "d-none";
             if (status.checked) {
-                canvasLandmarks.classList.add("d-none");
-                canvasAnonymized.classList.remove("d-none");
+                canvasLandmarks.classList.add(dNone);
+                canvasAnonymized.classList.remove(dNone);
             } else {
-                canvasAnonymized.classList.add("d-none");
-                canvasLandmarks.classList.remove("d-none");
+                canvasAnonymized.classList.add(dNone);
+                canvasLandmarks.classList.remove(dNone);
             }
         });
 
-        // --- Get FaceMesh landmarks
+        // Get FaceMesh landmarks
         const config = {
             locateFile: (file) => {
-                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@` +
-                    `${VERSION}/${file}`;
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@${VERSION}/${file}`;
             }
         };
         const solutionOptions = {
@@ -112,83 +74,109 @@
         };
         const faceMesh = new FaceMesh(config);
         faceMesh.setOptions(solutionOptions);
-        faceMesh.onResults(results => {
-            // Clear window for next frame
-            clearCanvas(ctxLandmarks);
+        faceMesh.onResults(handleFaceMeshResults);
 
-            // Update facial landmarks
-            if (results.multiFaceLandmarks.length > 0) {
-                // ctxLandmarks.drawImage(results.image, 0, 0);
-                // drawLandmarks(ctxLandmarks, results.multiFaceLandmarks[0], {color: 'white', lineWidth: 1, radius: 1})
-                ctxLandmarks.save();
-                const canvas = ctxLandmarks.canvas;
-                var x_min = 1;
-                var x_max = 0;
-                var y_min = 1;
-                var y_max = 0;
-                for (const landmark of results.multiFaceLandmarks[0]) {
-                    if (landmark.x > x_max) {
-                        x_max = landmark.x;
-                    } else if (landmark.x < x_min) {
-                        x_min = landmark.x;
-                    }
-                    if (landmark.y > y_max) {
-                        y_max = landmark.y;
-                    } else if (landmark.y < y_min) {
-                        y_min = landmark.y;
-                    }
+        // Waiting text
+        const text = "Please wait a moment.";
+        ctxLandmarks.textAlign = 'center';
+        ctxLandmarks.fillStyle = 'white';
+        ctxLandmarks.font = "20px Arial";
+        ctxLandmarks.fillText(text, canvasLandmarks.width / 2, canvasLandmarks.height / 2);
+
+        // Setup Webcam
+        (async () => {
+            const webcam_model = new Webcam(video, 'environment', canvasLandmarks);
+            try {
+                const inputDeviceInfos = await webcam_model.info();
+                const dropdownMenu = document.getElementById("dropdown-menu");
+                let items = "";
+                for (let i = 0; i < inputDeviceInfos.length; i++) {
+                    const deviceInfo = inputDeviceInfos[i];
+                    items += `<button id="button-${i}" class="dropdown-item">${deviceInfo.label}</button>`;
                 }
-                var aspect_ratio = (y_max - y_min) / (x_max - x_min);
-                const face_height = image_size;
-                const face_width = image_size / aspect_ratio;
-                for (const landmark of results.multiFaceLandmarks[0]) {
-                    const x_normalized = (landmark.x - x_min) / (x_max - x_min);
-                    const y_normalized = (landmark.y - y_min) / (y_max - y_min);
-                    const x_center = canvas.width / 2;
-                    const y_center = canvas.height / 2;
-                    const x = x_normalized * face_width + x_center - face_width / 2;
-                    const y = y_normalized * face_height + y_center - face_height / 2;
-                    // Decrease the size of the arc to compensate for the scale()
-                    const circle = new Path2D();
-                    circle.arc(x, y, 1, 0, 2 * Math.PI);
-                    ctxLandmarks.fillStyle = 'white';
-                    ctxLandmarks.fill(circle);
-                }
-                ctxLandmarks.restore();
-
-                // Run GANonymization
-                if (status.checked) {
-                    ctxAnonymized.save();
-                    const canvas = ctxAnonymized.canvas;
-                    // Extract landmarks from landmarks view
-                    const dx = canvas.width / 2 - image_size / 2;
-                    const dy = canvas.height / 2 - image_size / 2;
-                    const inputData = ctxLandmarks.getImageData(dx, dy, image_size, image_size)
-
-                    // Preprocess the input data
-                    const preprocessedData = preprocess(inputData, image_size);
-                    const input_tag = model.inputNames[0];
-                    const input_feed = {};
-                    input_feed[input_tag] = preprocessedData;
-
-                    // Run the ONNX model with the preprocessed input
-                    model.run(input_feed).then(output => {
-                        clearCanvas(ctxAnonymized);
-                        // Postprocess the output data
-                        const output_tag = model.outputNames[0];
-                        const postprocessedData = postprocess(output[output_tag], image_size);
-                        // Draw image
-                        ctxAnonymized.putImageData(postprocessedData, dx, dy);
-                        ctxAnonymized.restore();
-                    }).catch(error => {
-                        console.log(error);
+                dropdownMenu.innerHTML = items;
+                for (let i = 0; i < inputDeviceInfos.length; i++) {
+                    const deviceInfo = inputDeviceInfos[i];
+                    const button = document.getElementById(`button-${i}`);
+                    button.addEventListener('click', async () => {
+                        try {
+                            await webcam_model.start(true, deviceInfo.deviceId);
+                        } catch (err) {
+                            console.log(err);
+                        }
                     });
                 }
+                await webcam_model.start();
+                video.requestVideoFrameCallback(predictWebcam);
+            } catch (err) {
+                console.log(err);
             }
-        });
+        })();
+
+        async function handleFaceMeshResults(results) {
+            if (results.multiFaceLandmarks.length > 0) {
+                if (!status.checked) {
+                    clearCanvas(ctxLandmarks);
+                    ctxLandmarks.save();
+                    let x_min = 1;
+                    let x_max = 0;
+                    let y_min = 1;
+                    let y_max = 0;
+                    for (const landmark of results.multiFaceLandmarks[0]) {
+                        if (landmark.x > x_max) {
+                            x_max = landmark.x;
+                        } else if (landmark.x < x_min) {
+                            x_min = landmark.x;
+                        }
+                        if (landmark.y > y_max) {
+                            y_max = landmark.y;
+                        } else if (landmark.y < y_min) {
+                            y_min = landmark.y;
+                        }
+                    }
+                    const aspect_ratio = (y_max - y_min) / (x_max - x_min);
+                    const face_height = image_size;
+                    const face_width = image_size / aspect_ratio;
+                    for (const landmark of results.multiFaceLandmarks[0]) {
+                        const x_normalized = (landmark.x - x_min) / (x_max - x_min);
+                        const y_normalized = (landmark.y - y_min) / (y_max - y_min);
+                        const x_center = canvasLandmarks.width / 2;
+                        const y_center = canvasLandmarks.height / 2;
+                        const x = x_normalized * face_width + x_center - face_width / 2;
+                        const y = y_normalized * face_height + y_center - face_height / 2;
+                        const circle = new Path2D();
+                        circle.arc(x, y, 1, 0, 2 * Math.PI);
+                        ctxLandmarks.fillStyle = 'white';
+                        ctxLandmarks.fill(circle);
+                    }
+                    ctxLandmarks.restore();
+                } else {
+                    try {
+                        const response = await fetch('http://137.250.171.85:6060/ganonymization/api/v1.0/landmarks_to_face', {
+                            method: 'POST',
+                            headers: {
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({"landmarks": [results.multiFaceLandmarks[0]]})
+                        });
+                        const output = await response.json();
+                        const image = new Image();
+                        image.onload = function () {
+                            clearCanvas(ctxAnonymized);
+                            ctxAnonymized.save();
+                            ctxAnonymized.drawImage(image, canvasAnonymized.width / 2 - image.width / 2, canvasAnonymized.height / 2 - image.height / 2, image.width, image.height);
+                            ctxAnonymized.restore();
+                        };
+                        image.src = 'data:image/png;base64,' + output['images'][0];
+                    } catch (error) {
+                        console.log(error);
+                    }
+                }
+            }
+        }
 
         async function predictWebcam() {
-            // Extract webcam image
             ctxLandmarks.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, canvasLandmarks.width, canvasLandmarks.height);
             const image = new Image();
             image.src = canvasLandmarks.toDataURL();
@@ -198,7 +186,6 @@
 
         function clearCanvas(ctx) {
             const canvas = ctx.canvas;
-            // Clear window for next frame
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = 'black';

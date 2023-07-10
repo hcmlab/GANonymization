@@ -1,0 +1,11 @@
+numpy>=1.21.1
+opencv-python>=4.5.5.64
+Pillow>=9.2.0
+torch>=2.0.1+cu116
+torchvision>=0.15.2+cu116
+pytorch-lightning>=1.6.5
+fire>=0.5.0
+loguru>=0.6.0
+flask>=2.3.2
+tensorflow>=2.9.1
+flask-cors>=3.0.10

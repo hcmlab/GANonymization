@@ -1,0 +1,11 @@
+SECRET_KEY: hcai-lab-007
+
+server:
+  host: 0.0.0.0
+  port: 6060
+
+model:
+  url: 'epoch=49-step=579000.ckpt'
+
+logging:
+  level: 40 # critical=50, error=40, warning=30, info=20, debug=10
