@@ -4,7 +4,7 @@ import numpy as np
 from mediapipe.python.solutions.drawing_utils import DrawingSpec, WHITE_COLOR
 
 
-class FacialLandmarks468:
+class FacialLandmarks478:
     """Extract 468 facial landmark points from the picture and return it in a 2-dimensional picture."""
 
     def __call__(self, pic):

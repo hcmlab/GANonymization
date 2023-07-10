@@ -11,7 +11,7 @@ from tqdm import tqdm
 
 from lib.transform.face_crop_transformer import FaceCrop
 from lib.transform.face_segmentation_transformer import FaceSegmentation
-from lib.transform.facial_landmarks_468_transformer import FacialLandmarks468
+from lib.transform.facial_landmarks_468_transformer import FacialLandmarks478
 from lib.transform.zero_padding_resize_transformer import ZeroPaddingResize
 from lib.transform.pix2pix_transformer import Pix2PixTransformer
 from lib.utils import glob_dir

@@ -20,8 +20,11 @@ class FaceCrop:
         @return: numpy.ndarray: Converted image.
         """
         faces = [i[:, :, ::-1] for i in RetinaFace.extract_faces(pic, align=self.align)]
-        if self.multiple_faces and len(faces) > 0:
-            return faces[0]
+        if not self.multiple_faces:
+            if len(faces) > 0:
+                return faces[0]
+            else:
+                return None
         return faces
 
     def __repr__(self) -> str:

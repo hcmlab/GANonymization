@@ -22,7 +22,7 @@ from lib.evaluator import eval_classifier
 from lib.models.generic_classifier import GenericClassifier
 from lib.models.pix2pix import Pix2Pix
 from lib.trainer import setup_torch_device, setup
-from lib.transform import transform, FacialLandmarks468, FaceCrop, FaceSegmentation, ZeroPaddingResize, \
+from lib.transform import transform, FacialLandmarks478, FaceCrop, FaceSegmentation, ZeroPaddingResize, \
     Pix2PixTransformer
 from lib.utils import glob_dir, get_last_ckpt, move_files
 
@@ -64,7 +64,7 @@ def preprocess(input_path: str, img_size: int = 512, align: bool = True, test_si
     # Apply Transformers
     output_dir = transform(output_dir, img_size, False, FaceCrop(align, True), num_workers=num_workers)
     output_dir = transform(output_dir, img_size, False, FaceSegmentation(), num_workers=num_workers)
-    output_dir = transform(output_dir, img_size, True, FacialLandmarks468(), num_workers=num_workers)
+    output_dir = transform(output_dir, img_size, True, FacialLandmarks478(), num_workers=num_workers)
 
 
 def train_pix2pix(data_dir: str, log_dir: str, models_dir: str, output_dir: str, dataset_name: str, epoch: int = 0,
@@ -156,7 +156,7 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
     transform = torchvision.transforms.Compose([
         FaceCrop(align, False),
         ZeroPaddingResize(img_size),
-        FacialLandmarks468(),
+        FacialLandmarks478(),
         Pix2PixTransformer(model_file, img_size, device)
     ])
     img = transform(img)
