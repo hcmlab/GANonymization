@@ -1,7 +1,4 @@
 import os.path
-import os.path
-import os.path
-import os.path
 import pathlib
 import shutil
 
@@ -159,8 +156,9 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
         FacialLandmarks478(),
         Pix2PixTransformer(model_file, img_size, device)
     ])
-    img = transform(img)
-    save_image(img, output_file, normalize=True)
+    transformed_img = transform(img)
+    os.makedirs(os.path.dirname(output_file), exist_ok=True)
+    save_image(transformed_img, output_file, normalize=True)
 
 
 def anonymize_directory(model_file: str, input_directory: str, output_directory: str, img_size: int = 512,
