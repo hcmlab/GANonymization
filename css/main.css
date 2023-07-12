@@ -97,7 +97,7 @@ h1 {
     width: 30%;
     padding-top: 30%;
     border-radius: 50%;
-    background-image: url("../samples/sample_img.jpg");
+    background-image: url("https://raw.githubusercontent.com/hcmlab/GANonymization/demo/samples/sample_img.jpg");
     background-repeat: no-repeat;
     background-position: center;
     background-size: cover;
