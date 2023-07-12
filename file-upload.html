@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GANonymization - File Upload</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <link href="./css/main.css" rel="stylesheet"/>
+    <link href="./css/toggle.css" rel="stylesheet"/>
+    <link href="./css/sidebar.css" rel="stylesheet"/>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script type="text/javascript" src="./javascript/ndarray-browser-min.js"></script>
+    <script type="text/javascript" src="./javascript/mediapipe_face_mesh.js"></script>
+    <script type="text/javascript" src="./javascript/ganonymization.js"></script>
+    <script type="text/javascript" src="./javascript/utils.js"></script>
+
+    <!-- Script -->
+    <script type="module">
+        const image_size = 512;
+        let uploadButton = document.getElementById("upload-button");
+        let uploadSection = document.getElementById("upload-section");
+        let spinnerSection = document.getElementById("spinner-section");
+        let spinnerText = document.getElementById("spinner-text");
+        let container = document.querySelector(".container-full-screen");
+        let error = document.getElementById("error");
+        let imageDisplay = document.getElementById("image-display");
+        let canvasLandmarks = document.getElementById("canvas-landmarks");
+        var ctxLandmarks = canvasLandmarks.getContext('2d');
+        let canvasAnonymized = document.getElementById("canvas-anonymized");
+
+        // Setup canvas dimensions
+        canvasLandmarks.width = image_size;
+        canvasLandmarks.height = image_size;
+        canvasAnonymized.width = image_size;
+        canvasAnonymized.height = image_size;
+
+        // --- GANonymization Model
+        const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
+        const model_content = await fetch(model_file, {
+            redirect: 'follow',
+            cache: 'force-cache'
+        });
+        const model_buffer = await model_content.arrayBuffer();
+        // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
+        const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
+
+        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, () => {
+            spinnerText.textContent = "Generating anonymized face...";
+            anonymize(canvasLandmarks, canvasAnonymized, model, image_size, async () => {
+                canvasLandmarks.classList.add("d-none");
+                canvasAnonymized.classList.remove("d-none");
+                // download
+                var download_name = Date.now() + '_anonymized.jpg';
+                spinnerText.textContent = "Downloading result named '" + download_name + "'";
+                var link = document.createElement('a');
+                link.download = download_name;
+                link.href = canvasAnonymized.toDataURL()
+                link.click();
+                await delay(3000);
+                // Show upload-button
+                spinnerSection.classList.add("d-none");
+                canvasAnonymized.classList.add("d-none");
+                uploadSection.classList.remove("d-none");
+            })
+        });
+
+        const fileHandler = (file, name, type) => {
+            if (type.split("/")[0] !== "image") {
+                //File Type Error
+                error.innerText = "Please upload an image file";
+                return false;
+            }
+            error.innerText = "";
+            let reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onloadend = () => {
+                var img = new Image;
+                img.onload = function () {
+                    spinnerText.textContent = "Loading image...";
+                    // get the scale
+                    // it is the min of the 2 ratios
+                    let scale_factor = Math.min(canvasLandmarks.width / img.width, canvasLandmarks.height / img.height);
+
+                    // Lets get the new width and height based on the scale factor
+                    let newWidth = img.width * scale_factor;
+                    let newHeight = img.height * scale_factor;
+
+                    // get the top left position of the image
+                    // in order to center the image within the canvas
+                    let x = (canvasLandmarks.width / 2) - (newWidth / 2);
+                    let y = (canvasLandmarks.height / 2) - (newHeight / 2);
+
+                    // When drawing the image, we have to scale down the image
+                    // width and height in order to fit within the canvas
+                    ctxLandmarks.drawImage(img, x, y, newWidth, newHeight);
+
+                    // Hide upload-button
+                    uploadSection.classList.add("d-none");
+                    spinnerSection.classList.remove("d-none");
+                    canvasLandmarks.classList.remove("d-none");
+
+                    // Run face mesh extraction
+                    const image = new Image();
+                    image.src = canvasLandmarks.toDataURL();
+                    spinnerText.textContent = "Extracting facial landmarks...";
+                    faceMesh.send({image});
+                }
+                img.src = reader.result;
+            };
+        };
+
+        //Upload Button
+        uploadButton.addEventListener("change", () => {
+            Array.from(uploadButton.files).forEach((file) => {
+                fileHandler(file, file.name, file.type);
+            });
+        });
+
+        container.addEventListener(
+            "dragenter",
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                container.classList.add("active");
+            },
+            false
+        );
+
+        container.addEventListener(
+            "dragleave",
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                container.classList.remove("active");
+            },
+            false
+        );
+
+        container.addEventListener(
+            "dragover",
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                container.classList.add("active");
+            },
+            false
+        );
+
+        container.addEventListener(
+            "drop",
+            (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                container.classList.remove("active");
+                let draggedData = e.dataTransfer;
+                let files = draggedData.files;
+                Array.from(files).forEach((file) => {
+                    fileHandler(file, file.name, file.type);
+                });
+            },
+            false
+        );
+
+        window.onload = () => {
+            error.innerText = "";
+        };
+    </script>
+</head>
+<body>
+<main>
+    <!-- Sidebar-Left -->
+    <div id="sidebar-left">
+        <div class="social arxiv">
+            <a href="https://arxiv.org/abs/2305.02143" target="_blank">
+                <p>Read on arXiv <i class="bi bi-newspaper"></i></p>
+            </a>
+        </div>
+        <div class="social github">
+            <a href="https://github.com/hcmlab/GANonymization" target="_blank">
+                <p>Like on GitHub <i class="bi bi-github"></i></p>
+            </a>
+        </div>
+    </div>
+    <!-- Content -->
+    <h1>GANonymization</h1>
+    <div id="spinner-section"
+         style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%); text-align: center;" class="d-none">
+        <canvas id="canvas-landmarks" style="width: 512px; height: 512px;" class="d-none"></canvas>
+        <canvas id="canvas-anonymized" style="width: 512px; height: 512px;" class="d-none"></canvas>
+        <p style="width: 512px;">
+            <div class="spinner-border text-light" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+            <strong id="spinner-text" style="color: white;">Loading...</strong>
+        </p>
+    </div>
+    <div class="container-full-screen">
+        <div id="upload-section">
+            <input type="file" id="upload-button" multiple accept="image/*"/>
+            <label class="input-label" for="upload-button"><i class="fa-solid fa-upload"></i>&nbsp; Choose Or Drop Photos</label>
+            <div id="error"></div>
+        </div>
+    </div>
+    <div class="text-center d-none">
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+</main>
+</body>
+</html>

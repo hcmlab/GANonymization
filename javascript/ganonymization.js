@@ -49,3 +49,35 @@ function postprocess(outputData, imageSize) {
     // Return the postprocessed image data
     return outputImageData;
 }
+
+async function anonymize(canvas_input, canvas_output, model, image_size, on_update_callback) {
+    var ctxLandmarks = canvas_input.getContext('2d');
+    var ctxAnonymized = canvas_output.getContext('2d');
+    // Run GANonymization
+    ctxAnonymized.save();
+    // Extract landmarks from landmarks view
+    const dx = canvas_output.width / 2 - image_size / 2;
+    const dy = canvas_output.height / 2 - image_size / 2;
+    const inputData = ctxLandmarks.getImageData(dx, dy, image_size, image_size)
+
+    // Preprocess the input data
+    const preprocessedData = preprocess(inputData, image_size);
+    const input_tag = model.inputNames[0];
+    const input_feed = {};
+    input_feed[input_tag] = preprocessedData;
+
+    // Run the ONNX model with the preprocessed input
+    model.run(input_feed).then(output => {
+        clearCanvas(ctxAnonymized);
+        // Postprocess the output data
+        const output_tag = model.outputNames[0];
+        const postprocessedData = postprocess(output[output_tag], image_size);
+        // Draw image
+        ctxAnonymized.putImageData(postprocessedData, dx, dy);
+        ctxAnonymized.restore();
+
+        on_update_callback();
+    }).catch(error => {
+        console.log(error);
+    });
+}

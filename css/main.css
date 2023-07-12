@@ -2,6 +2,10 @@ html {
     overflow: hidden;
 }
 
+body {
+    background-color: black;
+}
+
 h1 {
     position: absolute;
     top: 2%;
@@ -13,9 +17,151 @@ h1 {
     text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
 }
 
-canvas {
+.drawer-canvas {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+}
+
+.left-side {
+    position: absolute;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    transform: skew(20deg) translateX(50%);
+    transform-origin: 0 50%;
+    background: #505050;
+    background: linear-gradient(110deg, rgba(0, 38, 87, 1) 0%, rgba(200, 200, 200, 1) 100%);
+    z-index: -1;
+    border: 0.5vw solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Roboto, sans-serif;
+}
+
+.left-side:hover {
+    background: #5f5f5f;
+    background: linear-gradient(110deg, rgb(0, 20, 47) 0%, rgb(0, 20, 47) 50%, rgba(150, 150, 150, 1) 100%);
+    cursor: pointer;
+}
+
+.right-side {
+    position: absolute;
+    left: 100%;
+    width: 100%;
+    height: 100%;
+    transform: skewX(20deg) translateX(-50%);
+    transform-origin: 0 50%;
+    background: #505050;
+    background: linear-gradient(110deg, rgba(200, 200, 200, 1) 0%, rgb(154, 0, 198) 100%);
+    z-index: -1;
+    border: 0.5vw solid white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: Roboto, sans-serif;
+}
+
+.right-side:hover {
+    background: #5f5f5f;
+    background: linear-gradient(110deg, rgba(150, 150, 150, 1) 0%, rgb(82, 0, 108) 50%, rgb(82, 0, 108) 100%);
+    cursor: pointer;
+}
+
+.title-left-side {
+    -ms-transform: skewX(-20deg);
+    transform: skewX(-20deg);
+    margin-left: 40vw;
+    width: 20%;
+    color: white;
+    text-align: center;
+}
+
+.title-right-side {
+    -ms-transform: skewX(-20deg);
+    transform: skewX(-20deg);
+    margin-right: 40vw;
+    width: 20%;
+    color: white;
+    text-align: center;
+}
+
+.title {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -ms-transform: translateX(-50%) translateY(-50%);
+    transform: translateX(-50%) translateY(-50%);
+    width: 30%;
+    padding-top: 30%;
+    border-radius: 50%;
+    background-image: url('https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/samples/sample_img.jpg');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    z-index: 0;
+    border: 1vw solid white;
+}
+
+.container-full-screen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    align-items: center;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.input-label {
+    display: block;
+    position: absolute;
+    background-color: #025bee;
+    color: #ffffff;
+    font-size: 1.1em;
+    text-align: center;
+    width: 16em;
+    padding: 1em 0;
+    border-radius: 0.3em;
+    margin: 0 auto 1em auto;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    left: 50%;
+    top: 50%;
+}
+
+#image-display {
+    position: relative;
+    width: 90%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-evenly;
+    gap: 1.25em;
+    flex-wrap: wrap;
+}
+
+#image-display figure {
+    width: 45%;
+}
+
+#image-display img {
+    width: 100%;
+}
+
+#image-display figcaption {
+    font-size: 0.8em;
+    text-align: center;
+    color: #5a5861;
+}
+
+.active {
+    border: 0.2em dashed #025bee;
+}
+
+#error {
+    text-align: center;
+    color: #ff3030;
 }

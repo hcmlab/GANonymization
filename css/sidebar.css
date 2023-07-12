@@ -17,6 +17,7 @@ p {
   position: fixed;
   right: 0;
   margin: 10px;
+  z-index: 10;
 }
 
 #sidebar-left {
@@ -26,6 +27,7 @@ p {
   text-align: center;
   padding: 10px;
   margin-left: 10px;
+  z-index: 10;
 }
 
 p i {

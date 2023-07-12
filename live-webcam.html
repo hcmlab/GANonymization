@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>GANonymization - Live Demo</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.1/themes/base/jquery-ui.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
+
+    <link href="./css/main.css" rel="stylesheet"/>
+    <link href="./css/toggle.css" rel="stylesheet"/>
+    <link href="./css/sidebar.css" rel="stylesheet"/>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.3.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.13.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+    <script type="text/javascript" src="./javascript/webcam-easy.js"></script>
+    <script type="text/javascript" src="./javascript/ndarray-browser-min.js"></script>
+    <script type="text/javascript" src="./javascript/mediapipe_face_mesh.js"></script>
+    <script type="text/javascript" src="./javascript/ganonymization.js"></script>
+    <script type="text/javascript" src="./javascript/utils.js"></script>
+
+    <script type="module">
+        const image_size = 512;
+        var status = document.getElementById("status");
+        var video = document.getElementById("webcam");
+        var canvasLandmarks = document.getElementById("canvas-landmarks");
+        canvasLandmarks.setAttribute('willReadFrequently', true);
+        var ctxLandmarks = canvasLandmarks.getContext('2d');
+        var canvasAnonymized = document.getElementById("canvas-anonymized");
+        var ctxAnonymized = canvasAnonymized.getContext('2d');
+
+        // Setup canvas dimensions
+        canvasLandmarks.width = window.innerWidth;
+        canvasLandmarks.height = window.innerHeight;
+        canvasAnonymized.width = window.innerWidth;
+        canvasAnonymized.height = window.innerHeight;
+
+        // Clear canvases
+        clearCanvas(ctxLandmarks);
+        clearCanvas(ctxAnonymized);
+
+        // Type Button event listener
+        status.addEventListener('change', function () {
+            let dNone = "d-none";
+            if (status.checked) {
+                canvasLandmarks.classList.add(dNone);
+                canvasAnonymized.classList.remove(dNone);
+            } else {
+                canvasAnonymized.classList.add(dNone);
+                canvasLandmarks.classList.remove(dNone);
+            }
+        });
+
+        // --- GANonymization Model
+        const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
+        const model_content = await fetch(model_file, {
+            redirect: 'follow',
+            cache: 'force-cache'
+        });
+        const model_buffer = await model_content.arrayBuffer();
+        // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
+        const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
+
+        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, () => {
+            if (status.checked) {
+                anonymize(canvasLandmarks, canvasAnonymized, model, image_size, () => {
+                })
+            }
+        });
+
+
+        // Waiting text
+        const text = "Please wait a moment.";
+        ctxLandmarks.textAlign = 'center';
+        ctxLandmarks.fillStyle = 'white';
+        ctxLandmarks.font = "20px Arial";
+        ctxLandmarks.fillText(text, canvasLandmarks.width / 2, canvasLandmarks.height / 2);
+
+        // Setup Webcam
+        (async () => {
+            const webcam_model = new Webcam(video, 'environment', canvasLandmarks);
+            try {
+                const inputDeviceInfos = await webcam_model.info();
+                const dropdownMenu = document.getElementById("dropdown-menu");
+                let items = "";
+                for (let i = 0; i < inputDeviceInfos.length; i++) {
+                    const deviceInfo = inputDeviceInfos[i];
+                    items += `<button id="button-${i}" class="dropdown-item">${deviceInfo.label}</button>`;
+                }
+                dropdownMenu.innerHTML = items;
+                for (let i = 0; i < inputDeviceInfos.length; i++) {
+                    const deviceInfo = inputDeviceInfos[i];
+                    const button = document.getElementById(`button-${i}`);
+                    button.addEventListener('click', async () => {
+                        try {
+                            await webcam_model.start(true, deviceInfo.deviceId);
+                        } catch (err) {
+                            console.log(err);
+                        }
+                    });
+                }
+                await webcam_model.start();
+                video.requestVideoFrameCallback(predictWebcam);
+            } catch (err) {
+                console.log(err);
+            }
+        })();
+
+        async function predictWebcam() {
+            ctxLandmarks.drawImage(video, 0, 0, video.videoWidth, video.videoHeight, 0, 0, canvasLandmarks.width, canvasLandmarks.height);
+            const image = new Image();
+            image.src = canvasLandmarks.toDataURL();
+            await faceMesh.send({image});
+            requestAnimationFrame(predictWebcam);
+        }
+    </script>
+</head>
+<body>
+<main>
+    <!-- Sidebar-Left -->
+    <div id="sidebar-left">
+        <div class="social arxiv">
+            <a href="https://arxiv.org/abs/2305.02143" target="_blank">
+                <p>Read on arXiv <i class="bi bi-newspaper"></i></p>
+            </a>
+        </div>
+        <div class="social github">
+            <a href="https://github.com/hcmlab/GANonymization" target="_blank">
+                <p>Like on GitHub <i class="bi bi-github"></i></p>
+            </a>
+        </div>
+    </div>
+    <!-- Sidebar-Right -->
+    <div id="sidebar-right" class="dropdown">
+        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+            <i class="bi bi-camera"></i>
+        </button>
+        <div id="dropdown-menu" class="dropdown-menu">
+        </div>
+    </div>
+    <!-- Content -->
+    <h1>GANonymization</h1>
+    <video id="webcam" autoplay playsinline width="1920" height="1080" class="d-none"></video>
+    <canvas id="canvas-landmarks" class="drawer-canvas" style="z-index: -10;"></canvas>
+    <canvas id="canvas-anonymized" class="drawer-canvas" style="z-index: -11;"></canvas>
+    <div class="custom-checkbox">
+        <input id="status"
+               type="checkbox"
+               name="status">
+        <label for="status">
+            <div class="status-switch"
+                 data-unchecked="Landmarks"
+                 data-checked="Anonymized">
+            </div>
+        </label>
+    </div>
+</main>
+</body>
+</html>
