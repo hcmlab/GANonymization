@@ -72,8 +72,8 @@
         // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
         const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
 
-        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, () => {
-            if (status.checked) {
+        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, true, (faceAvailable) => {
+            if (status.checked && faceAvailable) {
                 anonymize(canvasLandmarks, canvasAnonymized, model, image_size, () => {
                 })
             }

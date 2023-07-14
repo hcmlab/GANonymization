@@ -63,7 +63,7 @@
         uploadSection.classList.remove("d-none");
         spinnerSection.classList.add("d-none");
 
-        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, async (mesh_available) => {
+        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, false, async (mesh_available) => {
             if (mesh_available) {
                 spinnerText.textContent = "Generating anonymized face...";
                 anonymize(canvasLandmarks, canvasAnonymized, model, image_size, async () => {

@@ -1,4 +1,4 @@
-function setup_face_mesh(canvas, image_size, on_updated_callback) {
+function setup_face_mesh(canvas, image_size, selfieMode, on_updated_callback) {
     var ctx = canvas.getContext('2d');
     const config = {
         locateFile: (file) => {
@@ -6,7 +6,7 @@ function setup_face_mesh(canvas, image_size, on_updated_callback) {
         }
     };
     const solutionOptions = {
-        selfieMode: true,
+        selfieMode: selfieMode,
         enableFaceGeometry: false,
         maxNumFaces: 1,
         refineLandmarks: true,
