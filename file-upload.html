@@ -50,6 +50,8 @@
         canvasAnonymized.height = image_size;
 
         // --- GANonymization Model
+        uploadSection.classList.add("d-none");
+        spinnerSection.classList.remove("d-none");
         const model_file = "https://media.githubusercontent.com/media/hcmlab/GANonymization/demo/GANonymization.onnx";
         const model_content = await fetch(model_file, {
             redirect: 'follow',
@@ -58,25 +60,36 @@
         const model_buffer = await model_content.arrayBuffer();
         // const sessionOption = {executionProviders: ['wasm', 'cuda', 'cpu', 'webgl']};
         const model = await ort.InferenceSession.create(model_buffer); //, sessionOption);
+        uploadSection.classList.remove("d-none");
+        spinnerSection.classList.add("d-none");
 
-        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, () => {
-            spinnerText.textContent = "Generating anonymized face...";
-            anonymize(canvasLandmarks, canvasAnonymized, model, image_size, async () => {
-                canvasLandmarks.classList.add("d-none");
-                canvasAnonymized.classList.remove("d-none");
-                // download
-                var download_name = Date.now() + '_anonymized.jpg';
-                spinnerText.textContent = "Downloading result named '" + download_name + "'";
-                var link = document.createElement('a');
-                link.download = download_name;
-                link.href = canvasAnonymized.toDataURL()
-                link.click();
+        const faceMesh = setup_face_mesh(canvasLandmarks, image_size, async (mesh_available) => {
+            if (mesh_available) {
+                spinnerText.textContent = "Generating anonymized face...";
+                anonymize(canvasLandmarks, canvasAnonymized, model, image_size, async () => {
+                    canvasLandmarks.classList.add("d-none");
+                    canvasAnonymized.classList.remove("d-none");
+                    // download
+                    var download_name = Date.now() + '_anonymized.jpg';
+                    spinnerText.textContent = "Downloading result named '" + download_name + "'";
+                    var link = document.createElement('a');
+                    link.download = download_name;
+                    link.href = canvasAnonymized.toDataURL();
+                    link.click();
+                    await delay(3000);
+                    // Show upload-button
+                    spinnerSection.classList.add("d-none");
+                    canvasAnonymized.classList.add("d-none");
+                    uploadSection.classList.remove("d-none");
+                });
+            } else {
+                spinnerText.textContent = "No face detected -> Ending process!";
                 await delay(3000);
                 // Show upload-button
                 spinnerSection.classList.add("d-none");
-                canvasAnonymized.classList.add("d-none");
+                canvasLandmarks.classList.add("d-none");
                 uploadSection.classList.remove("d-none");
-            })
+            }
         });
 
         const fileHandler = (file, name, type) => {
@@ -91,6 +104,8 @@
             reader.onloadend = () => {
                 var img = new Image;
                 img.onload = function () {
+                    clearCanvas(ctxLandmarks);
+                    ctxLandmarks.save();
                     spinnerText.textContent = "Loading image...";
                     // get the scale
                     // it is the min of the 2 ratios
@@ -108,6 +123,7 @@
                     // When drawing the image, we have to scale down the image
                     // width and height in order to fit within the canvas
                     ctxLandmarks.drawImage(img, x, y, newWidth, newHeight);
+                    ctxLandmarks.restore();
 
                     // Hide upload-button
                     uploadSection.classList.add("d-none");

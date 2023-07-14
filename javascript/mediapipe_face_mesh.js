@@ -52,9 +52,9 @@ function setup_face_mesh(canvas, image_size, on_updated_callback) {
                 ctx.fill(circle);
             }
             ctx.restore();
-
-            on_updated_callback();
         }
+
+        on_updated_callback(results.multiFaceLandmarks.length > 0);
     });
     return faceMesh;
 }
