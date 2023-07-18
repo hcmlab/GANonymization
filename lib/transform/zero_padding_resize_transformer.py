@@ -21,7 +21,7 @@ class ZeroPaddingResize:
         """
         if isinstance(pic, np.ndarray):
             pic = Image.fromarray(pic)
-        if pic.width != self.size and pic.height != self.size:
+        if pic.width != self.size or pic.height != self.size:
             ratio = min(self.size / pic.width, self.size / pic.height)
             face_img = pic.resize((int(ratio * pic.width), int(ratio * pic.height)), Image.LANCZOS)
             new_im = Image.new("RGB", (self.size, self.size))
