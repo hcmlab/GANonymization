@@ -1,6 +1,6 @@
 # GANonymization: A GAN-based Face Anonymization Framework for Preserving Emotional Expressions
 
-[[Paper](https://arxiv.org/abs/2305.02143)]
+[[Paper](https://dl.acm.org/doi/10.1145/3641107)]
 [[Demo](https://hcmlab.github.io/GANonymization/)]
 
 We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities.
@@ -44,13 +44,20 @@ python main.py anonymize_image --model_file <path to model file> --input_file <i
 If you are using GANonymization in your research please consider giving us a citation:
 
 ```
-@misc{hellmann2023ganonymization,
-      title={GANonymization: A GAN-based Face Anonymization Framework for Preserving Emotional Expressions}, 
-      author={Fabio Hellmann and Silvan Mertes and Mohamed Benouis and Alexander Hustinx and Tzung-Chien Hsieh and Cristina Conati and Peter Krawitz and Elisabeth André},
-      year={2023},
-      eprint={2305.02143},
-      archivePrefix={arXiv},
-      primaryClass={cs.CV}
+@article{10.1145/3641107,
+      author = {Hellmann, Fabio and Mertes, Silvan and Benouis, Mohamed and Hustinx, Alexander and Hsieh, Tzung-Chien and Conati, Cristina and Krawitz, Peter and Andr\'{e}, Elisabeth},
+      title = {GANonymization: A GAN-based Face Anonymization Framework for Preserving Emotional Expressions},
+      year = {2024},
+      publisher = {Association for Computing Machinery},
+      address = {New York, NY, USA},
+      issn = {1551-6857},
+      url = {https://doi.org/10.1145/3641107},
+      doi = {10.1145/3641107},
+      abstract = {In recent years, the increasing availability of personal data has raised concerns regarding privacy and security. One of the critical processes to address these concerns is data anonymization, which aims to protect individual privacy and prevent the release of sensitive information. This research focuses on the importance of face anonymization. Therefore, we introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities. Our approach is based on a high-level representation of a face, which is synthesized into an anonymized version based on a generative adversarial network (GAN). The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes to increase the anonymity of the given individual face. Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and outperformed the state-of-the-art methods in most categories. Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and multiple others. Here, it demonstrated reliable performance in removing these attributes. Our results suggest that GANonymization is a promising approach for anonymizing faces while preserving facial expressions.},
+      note = {Just Accepted},
+      journal = {ACM Trans. Multimedia Comput. Commun. Appl.},
+      month = {jan},
+      keywords = {face anonymization, emotion recognition, data privacy, emotion preserving, facial landmarks}
 }
 ```
 
