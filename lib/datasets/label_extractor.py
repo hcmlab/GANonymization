@@ -188,26 +188,24 @@ label_extractors = {
 }
 
 
-def extract_labels(dataset_path: str, output_path: str) -> Optional[str]:
+def extract_labels(dataset_path: str) -> Optional[str]:
     """
     Extract the labels from the given dataset and bring it in a uniform format.
     @param dataset_path: The path to the dataset.
-    @param output_path: The path to save the results.
     @return: The path to the csv file or None if no extractor could be found.
     """
     path_parts = dataset_path.split(os.sep)
     for dataset_name in path_parts:
         if dataset_name in label_extractors:
             dataset_path = dataset_path[:dataset_path.index(dataset_name) + len(dataset_name)]
-            os.makedirs(output_path, exist_ok=True)
             logger.debug(f'Extracting labels for {dataset_name}...')
             # csv_file =
             extractor_class = label_extractors[dataset_name]
             extractor = extractor_class(dataset_path)
             df = extractor()
-            csv_file = os.path.join(output_path, 'labels.csv')
+            csv_file = os.path.join(dataset_path, 'labels.csv')
             df.to_csv(csv_file)
-            logger.info(f'Extracted labels from {dataset_name} to {output_path}')
+            logger.info(f'Extracted labels from {dataset_name} to {dataset_path}')
             df_anaylser = df.drop(['image_path'], axis=1)
             logger.debug(f'Meta-Data:\n{df_anaylser.drop(["split"], axis=1).sum()}')
             logger.debug(f'Train-Split:\n{df_anaylser[df_anaylser["split"] == 0].drop(["split"], axis=1).sum()}')

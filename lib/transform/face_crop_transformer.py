@@ -1,3 +1,4 @@
+import numpy as np
 from retinaface import RetinaFace
 
 
@@ -14,9 +15,9 @@ class FaceCrop:
         self.align = align
         self.multiple_faces = multiple_faces
 
-    def __call__(self, pic):
+    def __call__(self, pic: np.ndarray):
         """
-        @param pic (PIL Image or numpy.ndarray): Image to be converted to cropped faces.
+        @param pic (numpy.ndarray): Image to be converted to cropped faces.
         @return: numpy.ndarray: Converted image.
         """
         faces = [i[:, :, ::-1] for i in RetinaFace.extract_faces(pic, align=self.align)]

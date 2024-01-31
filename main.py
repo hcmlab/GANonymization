@@ -44,7 +44,7 @@ def preprocess(input_path: str, img_size: int = 512, align: bool = True, test_si
     output_dir = os.path.join(output_dir, 'original')
 
     # Split dataset
-    split_file = extract_labels(input_path, output_dir)
+    split_file = extract_labels(input_path)
     if split_file:
         df = pd.read_csv(split_file)
         for split, folder in enumerate(['train', 'val', 'test']):
@@ -89,11 +89,13 @@ def train_pix2pix(data_dir: str, log_dir: str, models_dir: str, output_dir: str,
     setup_torch_device(device, SEED)
     ckpt_file = get_last_ckpt(models_dir)
     resume_ckpt = None
+    out_dir = os.path.join(output_dir, dataset_name)
+    os.makedirs(out_dir, exist_ok=True)
     if ckpt_file is not None:
         resume_ckpt = os.path.join(models_dir, ckpt_file)
         model = Pix2Pix.load_from_checkpoint(resume_ckpt)
     else:
-        model = Pix2Pix(data_dir, models_dir, output_dir, n_epochs, dataset_name, batch_size, lr, b1,
+        model = Pix2Pix(data_dir, models_dir, out_dir, n_epochs, dataset_name, batch_size, lr, b1,
                         b2, n_cpu, img_size, device)
     trainer = setup(model, log_dir, models_dir, n_epochs, device, checkpoint_interval=checkpoint_interval)
     trainer.fit(model, ckpt_path=resume_ckpt)
@@ -150,15 +152,16 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
     @param device: The device to run the process on.
     """
     img = cv2.imread(input_file)
-    transform = torchvision.transforms.Compose([
-        FaceCrop(align, False),
-        ZeroPaddingResize(img_size),
-        FacialLandmarks478(),
-        Pix2PixTransformer(model_file, img_size, device)
-    ])
-    transformed_img = transform(img)
-    os.makedirs(os.path.dirname(output_file), exist_ok=True)
-    save_image(transformed_img, output_file, normalize=True)
+    if img is not None:
+        transform = torchvision.transforms.Compose([
+            FaceCrop(align, False),
+            ZeroPaddingResize(img_size),
+            FacialLandmarks478(),
+            Pix2PixTransformer(model_file, img_size, device)
+        ])
+        transformed_img = transform(img)
+        os.makedirs(os.path.dirname(output_file), exist_ok=True)
+        save_image(transformed_img, output_file, normalize=True)
 
 
 def anonymize_directory(model_file: str, input_directory: str, output_directory: str, img_size: int = 512,
@@ -173,8 +176,8 @@ def anonymize_directory(model_file: str, input_directory: str, output_directory:
     @param device: The device to run the process on.
     """
     for file in os.listdir(input_directory):
-        anonymize_image(model_file, file, os.path.join(output_directory, os.path.basename(file)), img_size, align,
-                        device)
+        anonymize_image(model_file, os.path.join(input_directory, file),
+                        os.path.join(output_directory, os.path.basename(file)), img_size, align, device)
 
 
 if __name__ == '__main__':
