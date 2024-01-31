@@ -1,10 +1,15 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import numpy as np
 from retinaface import RetinaFace
 
 
 class FaceCrop:
     """
-    The FaceCrop transformer is based on the RetinaFace library which extracts all available faces from the given image.
+    The FaceCrop transformer is based on the RetinaFace library which extracts all available faces
+    from the given image.
     """
 
     def __init__(self, align: bool, multiple_faces: bool):
@@ -21,12 +26,12 @@ class FaceCrop:
         @return: numpy.ndarray: Converted image.
         """
         faces = [i[:, :, ::-1] for i in RetinaFace.extract_faces(pic, align=self.align)]
-        if not self.multiple_faces:
-            if len(faces) > 0:
-                return faces[0]
-            else:
-                return None
-        return faces
+        if self.multiple_faces:
+            return faces
+        elif len(faces) > 0:
+            return faces[0]
+        else:
+            return None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"

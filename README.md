@@ -4,43 +4,57 @@
 [[Demo](https://hcmlab.github.io/GANonymization/)]
 
 We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities.
-Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on a generative adversarial network (GAN).
-The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes to increase the anonymity of the given individual face.
-Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and outperformed the state-of-the-art method in most categories.
-Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and multiple others. Here, it demonstrated reliable performance in removing these attributes.
+Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on
+a generative adversarial network (GAN).
+The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes
+to increase the anonymity of the given individual face.
+Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and
+outperformed the state-of-the-art method in most categories.
+Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and
+multiple others. Here, it demonstrated reliable performance in removing these attributes.
 
 ## Quick Start
+
 The project was tested only with python version 3.8. Newer versions might work as well.
 
 ### Installation
+
 1. Clone repository: `git clone https://github.com/hcmlab/GANonymization`.
 2. Install using `setup.py`:
+
 ```bash
 pip install -e .
 ```
+
 or:
+
 ```bash
 pip install git+https://github.com/hcmlab/GANonymization
 ```
 
 ### Training
+
 You can either download a pre-trained GANonymization model:
+
 * [Trained for 25 epochs](https://mediastore.rz.uni-augsburg.de/get/NsLjQYey65/) (publication version)
 * [Trained for 50 epochs](https://mediastore.rz.uni-augsburg.de/get/Sfle_etB1D/) (demo version)
 
 Or train the GANonymization model yourself:
+
 ```bash
 python main.py train_pix2pix --data_dir <data directory> --log_dir <log directory> --models_dir <models directory> --output_dir <output directory> --dataset_name <name of the dataset>
 ```
 
 ### Anonymize
+
 You can run the anonymization as followed:
+
 ```bash
 python main.py anonymize_image --model_file <path to model file> --input_file <image file> --output_file <output file>
 ```
 
-
 ## Citation
+
 If you are using GANonymization in your research please consider giving us a citation:
 
 ```
@@ -54,8 +68,8 @@ If you are using GANonymization in your research please consider giving us a cit
 }
 ```
 
-
 ## License
+
 ```
 MIT License
 

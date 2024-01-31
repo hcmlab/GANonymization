@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 from enum import Enum
 
 

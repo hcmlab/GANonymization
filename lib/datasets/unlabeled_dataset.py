@@ -1,19 +1,22 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os
 from typing import Tuple
 
 import numpy as np
-import torch
 from PIL import Image
 from loguru import logger
 from torch import Tensor
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 from torchvision.transforms import Compose
 
 from lib.datasets import DatasetSplit
 from lib.utils import glob_dir
 
 
-class UnlabeledDataset(torch.utils.data.Dataset):
+class UnlabeledDataset(Dataset):
     """
     The LabeledDataset wraps a folder structure of a dataset with train, val, and test folders
     and the corresponding labels.csv with the meta information.

@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os
 import pathlib
 import shutil
@@ -12,8 +16,8 @@ from tqdm import tqdm
 from lib.transform.face_crop_transformer import FaceCrop
 from lib.transform.face_segmentation_transformer import FaceSegmentation
 from lib.transform.facial_landmarks_478_transformer import FacialLandmarks478
-from lib.transform.zero_padding_resize_transformer import ZeroPaddingResize
 from lib.transform.pix2pix_transformer import Pix2PixTransformer
+from lib.transform.zero_padding_resize_transformer import ZeroPaddingResize
 from lib.utils import glob_dir
 
 
@@ -37,7 +41,8 @@ def exec(files: List[str], output_dir: str, input_dir: str, size: int, gallery: 
             for idx, sub_pred in enumerate(pred):
                 sub_pred = ZeroPaddingResize(size)(sub_pred)
                 os.makedirs(sub_output_dir, exist_ok=True)
-                output_file = os.path.join(sub_output_dir, f'{name}_{idx}-{pathlib.Path(image_file).name}')
+                output_file = os.path.join(sub_output_dir,
+                                           f'{name}_{idx}-{pathlib.Path(image_file).name}')
                 if gallery:
                     cv2.imwrite(output_file, cv2.hconcat([img, sub_pred]))
                 else:
@@ -50,7 +55,7 @@ def transform(input_dir: str, size: int, gallery: bool, transformer,
     """
     Transform all images found in the input directory.
     @param input_dir: The input directory.
-    @param size: The size of the images afterwards.
+    @param size: The size of the images afterward.
     @param gallery: Whether the image should be saved besides its original.
     @param transformer: The transformer to be applied.
     @param output_dir: The output directory.
@@ -82,9 +87,13 @@ def transform(input_dir: str, size: int, gallery: bool, transformer,
     if len(files_augment) > 0:
         logger.debug(f'Processing {len(files_augment)} files...')
         list_chunks = np.array_split(files_augment, num_workers)
-        logger.debug(f'Distribute workload to {num_workers} workers with a chunk size of {len(list_chunks[0])} each')
-        p_tqdm.p_umap(exec, list_chunks, [output_dir] * len(list_chunks), [input_dir] * len(list_chunks),
-                      [size] * len(list_chunks), [gallery] * len(list_chunks), [transformer] * len(list_chunks),
+        logger.debug(
+            f'Distribute workload to {num_workers} workers with a chunk size of '
+            f'{len(list_chunks[0])} each')
+        p_tqdm.p_umap(exec, list_chunks, [output_dir] * len(list_chunks),
+                      [input_dir] * len(list_chunks),
+                      [size] * len(list_chunks), [gallery] * len(list_chunks),
+                      [transformer] * len(list_chunks),
                       num_cpus=num_workers)
     else:
         logger.debug('Data has already been fully processed!')

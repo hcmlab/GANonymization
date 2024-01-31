@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os
 import random
 
@@ -18,7 +22,8 @@ def setup_torch_device(device: int, seed: int) -> str:
     @return: The string of the device.
     """
     torch_device = f'cuda:{device}' if device >= 0 else 'cpu'
-    logger.info(f"Using {'GPU.' if device >= 0 else 'CPU, as was explicitly requested, or as GPU is not available.'}")
+    logger.info(
+        f"Using {'GPU.' if device >= 0 else 'CPU, as was explicitly requested, or as GPU is not available.'}")
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
@@ -51,15 +56,18 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
     tb_logger = TensorBoardLogger(log_dir, name='', version='')
     callbacks = [LearningRateMonitor()]
     if save_top_k > 0:
-        callbacks.append(ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{' + monitor + ':.6f}',
-                                         save_top_k=save_top_k, monitor=monitor, mode=metric_mode))
+        callbacks.append(
+            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{' + monitor + ':.6f}',
+                            save_top_k=save_top_k, monitor=monitor, mode=metric_mode))
     else:
         callbacks.append(
-            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{step}', monitor='step', mode='max',
+            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{step}', monitor='step',
+                            mode='max',
                             save_top_k=-1, every_n_train_steps=checkpoint_interval))
     if early_stop_n > 0:
         callbacks.append(
-            EarlyStopping(monitor=monitor, min_delta=0.00, patience=early_stop_n, verbose=False, mode=metric_mode))
+            EarlyStopping(monitor=monitor, min_delta=0.00, patience=early_stop_n, verbose=False,
+                          mode=metric_mode))
 
     trainer = pytorch_lightning.Trainer(deterministic=True,
                                         accelerator="gpu" if device >= 0 else "cpu",

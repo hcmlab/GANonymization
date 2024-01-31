@@ -1,4 +1,9 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import cv2
+import numpy as np
 from head_segmentation import HumanHeadSegmentationPipeline
 
 
@@ -7,9 +12,9 @@ class FaceSegmentation:
     The FaceSegmentation transformer eliminates everything besides the face in the image.
     """
 
-    def __call__(self, pic):
+    def __call__(self, pic: np.ndarray):
         """
-        @param pic (PIL Image or numpy.ndarray): Image to be converted to a face segmentation.
+        @param pic (numpy.ndarray): Image to be converted to a face segmentation.
         @return: numpy.ndarray: Converted image.
         """
         segmentation_pipeline = HumanHeadSegmentationPipeline()

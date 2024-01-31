@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import torch
 from torchvision.transforms import transforms
 
@@ -10,6 +14,12 @@ class Pix2PixTransformer:
     """
 
     def __init__(self, model_file: str, img_size: int, device: int):
+        """
+        Initialize the transformer and load pretrained model.
+        @param model_file: The model file to load.
+        @param img_size: The image size to be used for the model.
+        @param device: The device to use to run the model's inference on.
+        """
         self.model = Pix2Pix.load_from_checkpoint(model_file)
         self.model.eval()
         self.model.to(device)
