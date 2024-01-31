@@ -4,16 +4,16 @@ Created by Fabio Hellmann.
 
 from setuptools import setup, find_packages
 
-major = 1
-minor = 0
-patch = 1
+MAJOR = 1
+MINOR = 0
+PATCH = 1
 
 with open('requirements.txt', encoding='UTF-8') as f:
     required = f.read().splitlines()
 
 setup(
     name="GANonymization",
-    version=f"{major}.{minor}.{patch}",
+    version=f"{MAJOR}.{MINOR}.{PATCH}",
     description="GANonymization: A GAN-based Face Anonymization Framework for Preserving "
                 "Emotional Expressions",
     author="Fabio Hellmann, Silvan Mertes, Mohamed Benouis, Alexander Hustinx, Tzung-Chien "

@@ -13,15 +13,12 @@ from loguru import logger
 from p_tqdm import p_tqdm
 from tqdm import tqdm
 
-from lib.transform.face_crop_transformer import FaceCrop
-from lib.transform.face_segmentation_transformer import FaceSegmentation
-from lib.transform.facial_landmarks_478_transformer import FacialLandmarks478
-from lib.transform.pix2pix_transformer import Pix2PixTransformer
 from lib.transform.zero_padding_resize_transformer import ZeroPaddingResize
 from lib.utils import glob_dir
 
 
-def exec(files: List[str], output_dir: str, input_dir: str, size: int, gallery: bool, transformer):
+def exec_augmentation(files: List[str], output_dir: str, input_dir: str, size: int, gallery: bool,
+                      transformer):
     """
     Executes the augmentation.
     @param files: The files to be augmented.
@@ -90,7 +87,7 @@ def transform(input_dir: str, size: int, gallery: bool, transformer,
         logger.debug(
             f'Distribute workload to {num_workers} workers with a chunk size of '
             f'{len(list_chunks[0])} each')
-        p_tqdm.p_umap(exec, list_chunks, [output_dir] * len(list_chunks),
+        p_tqdm.p_umap(exec_augmentation, list_chunks, [output_dir] * len(list_chunks),
                       [input_dir] * len(list_chunks),
                       [size] * len(list_chunks), [gallery] * len(list_chunks),
                       [transformer] * len(list_chunks),

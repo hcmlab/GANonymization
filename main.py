@@ -23,9 +23,11 @@ from lib.evaluator import eval_classifier
 from lib.models.generic_classifier import GenericClassifier
 from lib.models.pix2pix import Pix2Pix
 from lib.trainer import setup_torch_device, setup
-from lib.transform import transform, FacialLandmarks478, FaceCrop, FaceSegmentation, \
-    ZeroPaddingResize, \
-    Pix2PixTransformer
+from lib.transform import transform, ZeroPaddingResize
+from lib.transform.face_crop_transformer import FaceCrop
+from lib.transform.face_segmentation_transformer import FaceSegmentation
+from lib.transform.facial_landmarks_478_transformer import FacialLandmarks478
+from lib.transform.pix2pix_transformer import Pix2PixTransformer
 from lib.utils import glob_dir, get_last_ckpt, move_files
 
 SEED = 42
@@ -166,13 +168,13 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
     """
     img = cv2.imread(input_file)
     if img is not None:
-        transform = torchvision.transforms.Compose([
+        transformers = torchvision.transforms.Compose([
             FaceCrop(align, False),
             ZeroPaddingResize(img_size),
             FacialLandmarks478(),
             Pix2PixTransformer(model_file, img_size, device)
         ])
-        transformed_img = transform(img)
+        transformed_img = transformers(img)
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
         save_image(transformed_img, output_file, normalize=True)
 

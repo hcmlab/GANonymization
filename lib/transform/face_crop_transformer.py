@@ -30,8 +30,7 @@ class FaceCrop:
             return faces
         elif len(faces) > 0:
             return faces[0]
-        else:
-            return None
+        return None
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"

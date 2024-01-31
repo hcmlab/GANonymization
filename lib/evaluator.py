@@ -120,6 +120,6 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
         all_pred = np.squeeze(np.argmax(all_pred, axis=1))
     report = classification_report(all_label, all_pred, target_names=val_db.labels)
     with open(os.path.join(output_dir, f'{os.path.basename(data_dir)}_classification_report.txt'),
-              'w+') as f:
+              'w+', encoding='UTF-8') as f:
         f.write(report)
     logger.debug('Classification Report created!')

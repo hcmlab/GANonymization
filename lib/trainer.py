@@ -41,14 +41,16 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
           checkpoint_interval: int = None) -> pytorch_lightning.Trainer:
     """
     Run the lightning model.
-    :param model: The model to train.
-    :param num_epoch: The number of epochs to train.
-    :param device: The device to work on.
-    :param save_top_k: Save top k checkpoints - or every epoch if k=0.
-    :param monitor: The metric variable to monitor.
-    :param metric_mode: The mode of the metric to decide which checkpoint to choose (min or max).
-    :param early_stop_n: Stops training after n epochs of no improvement - default is deactivated.
-    :param checkpoint_interval: The interval a checkpoint should be saved if save_top_k is 0.
+    @param model: The model to train.
+    @param log_dir: The directory to save the logs.
+    @param models_dir: The directory to save the models.
+    @param num_epoch: The number of epochs to train.
+    @param device: The device to work on.
+    @param save_top_k: Save top k checkpoints - or every epoch if k=0.
+    @param monitor: The metric variable to monitor.
+    @param metric_mode: The mode of the metric to decide which checkpoint to choose (min or max).
+    @param early_stop_n: Stops training after n epochs of no improvement - default is deactivated.
+    @param checkpoint_interval: The interval a checkpoint should be saved if save_top_k is 0.
     """
     model_name = model.__class__.__name__
     os.makedirs(models_dir, exist_ok=True)
@@ -79,7 +81,8 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
                                         log_every_n_steps=1,
                                         detect_anomaly=True)
     logger.info(
-        f'Train {model_name} for {num_epoch} epochs and save logs under {tb_logger.log_dir} and models under {models_dir}')
+        f'Train {model_name} for {num_epoch} epochs and save logs under {tb_logger.log_dir} '
+        f'and models under {models_dir}')
     model.train()
     model.to(device)
     return trainer

@@ -67,7 +67,7 @@ class CelebALabelExtractor(LabelExtractor):
                          header=None)
         df = df.rename(columns={0: 'image_path', 1: 'split'})
         df = df.merge(
-            pd.read_csv(os.path.join(self.dataset_dir, 'list_attr_celeba.txt'), delimiter='\s+',
+            pd.read_csv(os.path.join(self.dataset_dir, 'list_attr_celeba.txt'), delimiter=r'\s+',
                         skiprows=1).rename_axis('image_path').reset_index(), on='image_path',
             how='left')
         labels = list(df.keys())[2:]
@@ -228,11 +228,12 @@ def extract_labels(dataset_path: str) -> Optional[str]:
             df.to_csv(csv_file)
             logger.info(f'Extracted labels from {dataset_name} to {dataset_path}')
             df_anaylser = df.drop(['image_path'], axis=1)
-            logger.debug(f'Meta-Data:\n{df_anaylser.drop(["split"], axis=1).sum()}')
-            logger.debug(
-                f'Train-Split:\n{df_anaylser[df_anaylser["split"] == 0].drop(["split"], axis=1).sum()}')
-            logger.debug(
-                f'Validation-Split:\n{df_anaylser[df_anaylser["split"] == 1].drop(["split"], axis=1).sum()}')
+            meta_data = df_anaylser.drop(["split"], axis=1).sum()
+            logger.debug(f'Meta-Data:\n{meta_data}')
+            train_split = df_anaylser[df_anaylser["split"] == 0].drop(["split"], axis=1).sum()
+            logger.debug(f'Train-Split:\n{train_split}')
+            val_split = df_anaylser[df_anaylser["split"] == 1].drop(["split"], axis=1).sum()
+            logger.debug(f'Validation-Split:\n{val_split}')
             return csv_file
     logger.warning(f'No label extractor found for {dataset_path}')
     return None
