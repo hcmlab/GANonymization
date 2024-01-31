@@ -122,7 +122,38 @@ confidence=
 # Unfortunately, since the options parsing does not support multi-line entries
 # nor line continuation, all of the above items are redundantly specified here
 # in a way that pylint is willing to parse.
-disable=super-on-old-class,arguments-differ,signature-differs,method-hidden,abstract-method,no-member,relative-import,no-init,import-error,attribute-defined-outside-init,abstract-class-not-used,unused-argument,unused-variable,invalid-name,duplicate-code,abstract-class-little-used,too-few-public-methods,too-many-instance-attributes,too-many-ancestors,too-many-return-statements,too-many-lines,too-many-locals,too-many-function-args,too-many-public-methods,too-many-arguments,bad-continuation,no-self-use,missing-docstring,fixme,star-args,locally-disabled,locally-enabled,bad-option-value
+disable=
+    no-member,
+    no-name-in-module,
+    no-init,
+    no-else-return,
+    arguments-differ,
+    unpacking-non-sequence,
+    not-callable,
+    useless-parent-delegation,
+    attribute-defined-outside-init,
+    unused-argument,
+    unused-variable,
+    invalid-name,
+    duplicate-code,
+    abstract-class-little-used,
+    too-few-public-methods,
+    too-many-instance-attributes,
+    too-many-ancestors,
+    too-many-return-statements,
+    too-many-lines,
+    too-many-locals,
+    too-many-function-args,
+    too-many-public-methods,
+    too-many-arguments,
+    bad-continuation,
+    no-self-use,
+    missing-docstring,
+    fixme,
+    star-args,
+    locally-disabled,
+    locally-enabled,
+    bad-option-value
 
 [REPORTS]
 
@@ -139,11 +170,14 @@ reports=no
 # respectively contain the number of errors / warnings messages and the total
 # number of statements analyzed. This is used by the global evaluation report
 # (RP0004).
-evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10)
+evaluation=max(0, 0 if fatal else 10.0 - ((float(5 * error + warning + refactor + convention) / statement) * 10))
 
 # Template used to display messages. This is a python new-style format string
 # used to format the message information. See doc for all details
 #msg-template=
+
+# Activate the evaluation score.
+score=yes
 
 
 [SPELLING]

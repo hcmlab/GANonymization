@@ -102,7 +102,7 @@ class CKPlusLabelExtractor(LabelExtractor):
             label_path = os.path.join(labels_path, f'{pathlib.Path(file).stem}_emotion.txt')
             # creating on hot encoding
             if os.path.exists(label_path):
-                with open(label_path, 'r') as label_file:
+                with open(label_path, 'r', encoding='UTF-8') as label_file:
                     mapped_idx = int(float(label_file.readline().strip()))
                     sid = folder_structure[-3]
                     result['subject_id'].append(sid)

@@ -22,8 +22,7 @@ def setup_torch_device(device: int, seed: int) -> str:
     @return: The string of the device.
     """
     torch_device = f'cuda:{device}' if device >= 0 else 'cpu'
-    logger.info(
-        f"Using {'GPU.' if device >= 0 else 'CPU, as was explicitly requested, or as GPU is not available.'}")
+    logger.info(f"Using {'GPU' if device >= 0 else 'CPU'}.")
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
