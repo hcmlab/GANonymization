@@ -2,7 +2,6 @@
 Created by Fabio Hellmann.
 """
 import urllib.request
-from typing import List
 
 import cv2
 import numpy as np

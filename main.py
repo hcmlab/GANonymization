@@ -10,11 +10,9 @@ import cv2
 import fire
 import pandas as pd
 import pytorch_lightning
-import torchvision.transforms
 from loguru import logger
 from sklearn.model_selection import train_test_split
 from torchvision.transforms import RandomHorizontalFlip, Compose
-from torchvision.utils import save_image
 
 from lib.datasets import DatasetSplit
 from lib.datasets.label_extractor import extract_labels

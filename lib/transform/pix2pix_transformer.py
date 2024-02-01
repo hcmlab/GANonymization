@@ -1,7 +1,6 @@
 """
 Created by Fabio Hellmann.
 """
-from typing import List
 
 import numpy as np
 import torch

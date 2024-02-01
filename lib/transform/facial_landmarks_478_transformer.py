@@ -1,7 +1,6 @@
 """
 Created by Fabio Hellmann.
 """
-from typing import List
 
 import cv2
 import mediapipe
