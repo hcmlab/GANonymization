@@ -1,6 +1,7 @@
 """
 Created by Fabio Hellmann.
 """
+from typing import List
 
 import numpy as np
 from PIL import Image
@@ -18,9 +19,9 @@ class ZeroPaddingResize:
         """
         self.size = size
 
-    def __call__(self, pic):
+    def __call__(self, pic: np.ndarray) -> np.ndarray:
         """
-        @param pic (PIL Image or numpy.ndarray): Image to be converted to center zero-padded
+        @param pic (numpy.ndarray): Image to be converted to center zero-padded
         and resized image.
         @return: numpy.ndarray: Converted image.
         """
@@ -33,8 +34,8 @@ class ZeroPaddingResize:
             new_im = Image.new("RGB", (self.size, self.size))
             new_im.paste(face_img,
                          ((self.size - face_img.width) // 2, (self.size - face_img.height) // 2))
-            pic = np.array(new_im)
-        return pic
+            pic = new_im
+        return np.array(pic)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"

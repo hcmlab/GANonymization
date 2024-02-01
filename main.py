@@ -67,9 +67,10 @@ def preprocess(input_path: str, img_size: int = 512, align: bool = True, test_si
         move_files(test_files, os.path.join(output_dir, 'val'))
 
     # Apply Transformers
-    output_dir = transform(output_dir, img_size, False, FaceCrop(align, True),
+    output_dir = transform(output_dir, img_size, False, FaceCrop(align),
                            num_workers=num_workers)
-    output_dir = transform(output_dir, img_size, False, FaceSegmentation(), num_workers=num_workers)
+    output_dir = transform(output_dir, img_size, False, FaceSegmentation(),
+                           num_workers=num_workers)
     output_dir = transform(output_dir, img_size, True, FacialLandmarks478(),
                            num_workers=num_workers)
 
@@ -104,7 +105,7 @@ def train_pix2pix(data_dir: str, log_dir: str, models_dir: str, output_dir: str,
     os.makedirs(out_dir, exist_ok=True)
     if ckpt_file is not None:
         resume_ckpt = os.path.join(models_dir, ckpt_file)
-        model = Pix2Pix.load_from_checkpoint(resume_ckpt)
+        model = Pix2Pix.load_from_checkpoint(checkpoint_path=resume_ckpt)
     else:
         model = Pix2Pix(data_dir, models_dir, out_dir, n_epochs, dataset_name, batch_size, lr, b1,
                         b2, n_cpu, img_size, device)
@@ -168,15 +169,12 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
     """
     img = cv2.imread(input_file)
     if img is not None:
-        transformers = torchvision.transforms.Compose([
-            FaceCrop(align, False),
-            ZeroPaddingResize(img_size),
-            FacialLandmarks478(),
-            Pix2PixTransformer(model_file, img_size, device)
-        ])
-        transformed_img = transformers(img)
+        img = FaceCrop(align)(img)[0]
+        img = ZeroPaddingResize(img_size)(img)
+        img = FacialLandmarks478()(img)
+        img = Pix2PixTransformer(model_file, img_size, device)(img)
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        save_image(transformed_img, output_file, normalize=True)
+        cv2.imwrite(output_file, img)
 
 
 def anonymize_directory(model_file: str, input_directory: str, output_directory: str,

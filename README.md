@@ -1,17 +1,21 @@
-# GANonymization: A GAN-based Face Anonymization Framework for Preserving Emotional Expressions
+<div align="center">
 
-[[Paper](https://dl.acm.org/doi/10.1145/3641107)]
-[[Demo](https://hcmlab.github.io/GANonymization/)]
+______________________________________________________________________
+# GANonymization
 
-We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities.
-Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on
-a generative adversarial network (GAN).
-The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes
-to increase the anonymity of the given individual face.
-Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and
-outperformed the state-of-the-art method in most categories.
-Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and
-multiple others. Here, it demonstrated reliable performance in removing these attributes.
+#### A GAN-based Face Anonymization Framework for Preserving Emotional Expressions
+______________________________________________________________________
+
+[![Unit-Tests](https://github.com/hcmlab/GANonymization/actions/workflows/python-app.yml/badge.svg?branch=main&event=push)](https://github.com/hcmlab/GANonymization/actions/workflows/python-app.yml)
+[![PyLint-Tests](https://github.com/hcmlab/GANonymization/actions/workflows/pylint.yml/badge.svg?branch=main&event=push)](https://github.com/hcmlab/GANonymization/actions/workflows/pylint.yml)
+
+[**Paper**](https://dl.acm.org/doi/10.1145/3641107)
+|
+[**Demo**](https://hcmlab.github.io/GANonymization/)
+
+</div>
+
+> We introduce GANonymization, a novel face anonymization framework with facial expression-preserving abilities. Our approach is based on a high-level representation of a face which is synthesized into an anonymized version based on a generative adversarial network (GAN). The effectiveness of the approach was assessed by evaluating its performance in removing identifiable facial attributes to increase the anonymity of the given individual face. Additionally, the performance of preserving facial expressions was evaluated on several affect recognition datasets and outperformed the state-of-the-art method in most categories. Finally, our approach was analyzed for its ability to remove various facial traits, such as jewelry, hair color, and multiple others. Here, it demonstrated reliable performance in removing these attributes.
 
 ## Quick Start
 

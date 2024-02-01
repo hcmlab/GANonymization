@@ -35,6 +35,8 @@ def exec_augmentation(files: List[str], output_dir: str, input_dir: str, size: i
         img = cv2.imread(image_file)
         if img is not None:
             pred = transformer(img)
+            if not isinstance(pred, List):
+                pred = [pred]
             for idx, sub_pred in enumerate(pred):
                 sub_pred = ZeroPaddingResize(size)(sub_pred)
                 os.makedirs(sub_output_dir, exist_ok=True)

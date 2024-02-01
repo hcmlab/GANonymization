@@ -1,6 +1,7 @@
 """
 Created by Fabio Hellmann.
 """
+from typing import List
 
 import cv2
 import mediapipe
@@ -13,9 +14,9 @@ class FacialLandmarks478:
     Extract 468 facial landmark points from the picture and return it in a 2-dimensional picture.
     """
 
-    def __call__(self, pic):
+    def __call__(self, pic: np.ndarray) -> np.ndarray:
         """
-        @param pic (PIL Image or numpy.ndarray): Image to be converted to a facial landmark image
+        @param pic (numpy.ndarray): Image to be converted to a facial landmark image
         with 468 points.
         @return: numpy.ndarray: Converted image.
         """

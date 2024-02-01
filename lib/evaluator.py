@@ -29,7 +29,7 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
     os.makedirs(output_dir, exist_ok=True)
     val_db = LabeledDataset(data_dir, DatasetSplit.VALIDATION,
                             Compose([GenericClassifier.weights.transforms()]))
-    model = GenericClassifier.load_from_checkpoint(get_last_ckpt(models_dir),
+    model = GenericClassifier.load_from_checkpoint(checkpoint_path=get_last_ckpt(models_dir),
                                                    classes=val_db.classes,
                                                    multi_label=val_db.is_multi_label)
     model.eval()
