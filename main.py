@@ -13,6 +13,7 @@ import pytorch_lightning
 from loguru import logger
 from sklearn.model_selection import train_test_split
 from torchvision.transforms import RandomHorizontalFlip, Compose
+from tqdm import tqdm
 
 from lib.datasets import DatasetSplit
 from lib.datasets.label_extractor import extract_labels
@@ -186,7 +187,7 @@ def anonymize_directory(model_file: str, input_directory: str, output_directory:
     @param align: Whether to align the image based on the facial orientation.
     @param device: The device to run the process on.
     """
-    for file in os.listdir(input_directory):
+    for file in tqdm(os.listdir(input_directory), desc=f"Anonymizing from {input_directory}"):
         input_file = os.path.join(input_directory, file)
         output_file = os.path.join(output_directory, os.path.basename(file))
         anonymize_image(model_file, input_file, output_file, img_size, align, device)
