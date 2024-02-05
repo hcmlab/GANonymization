@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os.path
 
 import numpy as np
@@ -25,7 +29,8 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
     os.makedirs(output_dir, exist_ok=True)
     val_db = LabeledDataset(data_dir, DatasetSplit.VALIDATION,
                             Compose([GenericClassifier.weights.transforms()]))
-    model = GenericClassifier.load_from_checkpoint(get_last_ckpt(models_dir), classes=val_db.classes,
+    model = GenericClassifier.load_from_checkpoint(checkpoint_path=get_last_ckpt(models_dir),
+                                                   classes=val_db.classes,
                                                    multi_label=val_db.is_multi_label)
     model.eval()
     model.to(device)
@@ -54,7 +59,8 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
     # Confusion Matrix
     all_label = np.asarray(all_label)
     all_pred = np.asarray(all_pred)
-    np.savez_compressed(os.path.join(output_dir, 'result_pred_label.npz'), pred=all_pred, label=all_label)
+    np.savez_compressed(os.path.join(output_dir, 'result_pred_label.npz'), pred=all_pred,
+                        label=all_label)
     conf_matrix = cm.compute()
     conf_matrix = conf_matrix.cpu().detach().numpy()
     logger.debug('Creating Confusion Matrix...')
@@ -75,9 +81,11 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
             label = model.classes[idx]
             binary_labels = ['Present', 'Absent']
             df_cm = pd.DataFrame(conf_matrix[idx, :, :], index=binary_labels, columns=binary_labels)
-            df_cm.to_csv(os.path.join(output_dir, f'{os.path.basename(data_dir)}_{label}_confusion_matrix.csv'))
+            df_cm.to_csv(os.path.join(output_dir,
+                                      f'{os.path.basename(data_dir)}_{label}_confusion_matrix.csv'))
             sn.set(font_scale=1.3)
-            sn.heatmap(df_cm, annot=True, fmt='.2f', xticklabels=binary_labels, yticklabels=binary_labels,
+            sn.heatmap(df_cm, annot=True, fmt='.2f', xticklabels=binary_labels,
+                       yticklabels=binary_labels,
                        ax=grid[idx], cbar_ax=grid[0].cax, annot_kws={'fontsize': 13})
             grid[idx].set_ylabel('Actual')
             grid[idx].set_xlabel('Predicted')
@@ -89,12 +97,14 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
         df_cm = pd.DataFrame(conf_matrix, index=val_db.labels, columns=val_db.labels)
         df_cm.to_csv(os.path.join(output_dir, f'{os.path.basename(data_dir)}_confusion_matrix.csv'))
         plt.figure(figsize=(
-            len(val_db.labels) + int(len(val_db.labels) / 2), len(val_db.labels) + int(len(val_db.labels) / 2)))
+            len(val_db.labels) + int(len(val_db.labels) / 2),
+            len(val_db.labels) + int(len(val_db.labels) / 2)))
         plt.tight_layout()
         sn.set(font_scale=1.3)
-        sn.heatmap(df_cm, annot=True, fmt='.2f', xticklabels=val_db.labels, yticklabels=val_db.labels, annot_kws={
-            'fontsize': 13
-        })
+        sn.heatmap(df_cm, annot=True, fmt='.2f', xticklabels=val_db.labels,
+                   yticklabels=val_db.labels, annot_kws={
+                'fontsize': 13
+            })
         plt.ylabel('Actual')
         plt.xlabel('Predicted')
         plt.savefig(os.path.join(output_dir, f'{os.path.basename(data_dir)}_confusion_matrix.png'))
@@ -110,6 +120,6 @@ def eval_classifier(models_dir: str, data_dir: str, batch_size: int = 128, devic
         all_pred = np.squeeze(np.argmax(all_pred, axis=1))
     report = classification_report(all_label, all_pred, target_names=val_db.labels)
     with open(os.path.join(output_dir, f'{os.path.basename(data_dir)}_classification_report.txt'),
-              'w+') as f:
+              'w+', encoding='UTF-8') as f:
         f.write(report)
     logger.debug('Classification Report created!')

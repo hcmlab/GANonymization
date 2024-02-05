@@ -1,9 +1,13 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os
 import os.path
 import pathlib
 import shutil
 from glob import glob
-from typing import Optional, List
+from typing import Optional, List, Tuple
 
 from tqdm import tqdm
 
@@ -31,7 +35,7 @@ def get_last_ckpt(ckpt_directory: str) -> Optional[str]:
     return None
 
 
-def glob_dir(directory: str, exclude: List[str] = ['Thumbs.db', '.DS_Store']):
+def glob_dir(directory: str, exclude: Tuple[str] = ('Thumbs.db', '.DS_Store')):
     """
     Recursively search and list all files in the directory filtered by the exclusion clause.
     @param directory: The directory to search in.
@@ -39,4 +43,5 @@ def glob_dir(directory: str, exclude: List[str] = ['Thumbs.db', '.DS_Store']):
     @return: A list of files.
     """
     return list(
-        filter(lambda f: not f.endswith(tuple(exclude)), glob(os.path.join(directory, '**', f'*.*'), recursive=True)))
+        filter(lambda f: not f.endswith(exclude),
+               glob(os.path.join(directory, '**', '*.*'), recursive=True)))

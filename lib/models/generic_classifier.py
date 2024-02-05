@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 from typing import List
 
 import pytorch_lightning as pl
@@ -25,7 +29,8 @@ class GenericClassifier(pl.LightningModule):
                  train_db: LabeledDataset = None, class_weights: Tensor = None):
         """
         Create a new GenericClassifier.
-        @param multi_label: If the problem at hand is multi-label then True otherwise False for multi-class.
+        @param multi_label: If the problem at hand is multi-label then True otherwise False for
+        multi-class.
         @param classes: The class names as a list.
         @param batch_size: The size of the batches.
         @param learning_rate: The learning rate.
@@ -47,18 +52,19 @@ class GenericClassifier(pl.LightningModule):
         self.num_classes = len(classes)
         # Define model architecture
         self.model = convnext_base(weights=self.weights)
-        self.model.classifier[-1] = nn.Linear(self.model.classifier[-1].in_features, self.num_classes)
+        self.model.classifier[-1] = nn.Linear(self.model.classifier[-1].in_features,
+                                              self.num_classes)
         self.class_weights = class_weights.float().to(device)
         # Loss function, accuracy
         if self.multi_label:
-            logger.debug(f'Model is a Multi-Label Classificator')
+            logger.debug('Model is a Multi-Label Classificator')
             self.loss_function = torch.nn.BCEWithLogitsLoss(reduction='none').to(device)
             self.activation = torch.nn.Sigmoid().to(device)
             self.metrics = {
                 'accuracy': MultilabelAccuracy(num_labels=self.num_classes).to(device)
             }
         else:
-            logger.debug(f'Model is a Multi-Class Classificator')
+            logger.debug('Model is a Multi-Class Classificator')
             self.loss_function = torch.nn.CrossEntropyLoss(weight=self.class_weights).to(device)
             self.activation = torch.nn.Softmax(dim=1).to(device)
             self.metrics = {
@@ -74,7 +80,8 @@ class GenericClassifier(pl.LightningModule):
         return self.activation(self.forward(x))
 
     def configure_optimizers(self):
-        optimizer = torch.optim.AdamW(params=self.parameters(), lr=self.learning_rate, weight_decay=0.001)
+        optimizer = torch.optim.AdamW(params=self.parameters(), lr=self.learning_rate,
+                                      weight_decay=0.001)
         scheduler = ReduceLROnPlateau(optimizer, monitor='val_loss', patience=3)
         return [optimizer], [{'scheduler': scheduler, 'interval': 'epoch', 'monitor': 'val_loss'}]
 
@@ -83,7 +90,8 @@ class GenericClassifier(pl.LightningModule):
         return loss
 
     def train_dataloader(self):
-        return DataLoader(self.train_db, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        return DataLoader(self.train_db, batch_size=self.batch_size, shuffle=True,
+                          num_workers=self.num_workers)
 
     def validation_step(self, val_batch, batch_idx):
         _, labels = val_batch
@@ -94,7 +102,8 @@ class GenericClassifier(pl.LightningModule):
             self.log(f'val_{key}', metric(output, labels), prog_bar=True)
 
     def val_dataloader(self):
-        return DataLoader(self.val_db, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        return DataLoader(self.val_db, batch_size=self.batch_size, shuffle=True,
+                          num_workers=self.num_workers)
 
     def step(self, tag: str, batch):
         images, labels = batch

@@ -1,3 +1,8 @@
+"""
+Created by Fabio Hellmann.
+"""
+
+
 import os
 import pathlib
 from abc import ABC, abstractmethod
@@ -33,12 +38,24 @@ label_map = {
 
 
 class LabelExtractor(ABC):
+    """
+    An extractor for the labels of the dataset.
+    """
+
     def __init__(self, dataset_dir: str):
+        """
+        Initialize the LabelExtractor.
+        @param dataset_dir: The directory to the dataset.
+        """
         self.dataset_dir = dataset_dir
 
     @abstractmethod
     def __call__(self) -> pd.DataFrame:
-        pass
+        """
+        Extract the labels from the dataset.
+        @return: The labels as pandas.DataFrame.
+        """
+        raise NotImplementedError()
 
 
 class CelebALabelExtractor(LabelExtractor):
@@ -50,8 +67,9 @@ class CelebALabelExtractor(LabelExtractor):
                          header=None)
         df = df.rename(columns={0: 'image_path', 1: 'split'})
         df = df.merge(
-            pd.read_csv(os.path.join(self.dataset_dir, 'list_attr_celeba.txt'), delimiter='\s+',
-                        skiprows=1).rename_axis('image_path').reset_index(), on='image_path', how='left')
+            pd.read_csv(os.path.join(self.dataset_dir, 'list_attr_celeba.txt'), delimiter=r'\s+',
+                        skiprows=1).rename_axis('image_path').reset_index(), on='image_path',
+            how='left')
         labels = list(df.keys())[2:]
         df[labels] = (df[labels] + 1) / 2
         return df
@@ -84,7 +102,7 @@ class CKPlusLabelExtractor(LabelExtractor):
             label_path = os.path.join(labels_path, f'{pathlib.Path(file).stem}_emotion.txt')
             # creating on hot encoding
             if os.path.exists(label_path):
-                with open(label_path, 'r') as label_file:
+                with open(label_path, 'r', encoding='UTF-8') as label_file:
                     mapped_idx = int(float(label_file.readline().strip()))
                     sid = folder_structure[-3]
                     result['subject_id'].append(sid)
@@ -92,7 +110,8 @@ class CKPlusLabelExtractor(LabelExtractor):
                     for idx, key in enumerate(labels):
                         result[key].append(1 if idx == mapped_idx - 1 else 0)
         df = pd.DataFrame(result)
-        df_grouped = df.groupby(['subject_id'])[labels].sum().sample(frac=val_split, random_state=SEED)
+        df_grouped = df.groupby(['subject_id'])[labels].sum().sample(frac=val_split,
+                                                                     random_state=SEED)
         df_train = df.loc[~df['subject_id'].isin(df_grouped.index)]
         df_train['split'] = [0] * len(df_train)
         df_val = df.loc[df['subject_id'].isin(df_grouped.index)]
@@ -159,7 +178,8 @@ class FacesLabelExtractor(LabelExtractor):
             'disgust': [],
             'anger': [],
         }
-        val_set = ['004', '066', '079', '116', '140', '168']  # Subject photos officially usable for publications
+        val_set = ['004', '066', '079', '116', '140',
+                   '168']  # Subject photos officially usable for publications
         val_split = 0.2
         labels = list(result.keys())[2:]
         for file in tqdm(glob_dir(os.path.join(self.dataset_dir, 'bilder'))):
@@ -172,7 +192,8 @@ class FacesLabelExtractor(LabelExtractor):
             for idx, key in enumerate(labels):
                 result[key].append(1 if idx == mapped_idx else 0)
         df = pd.DataFrame(result)
-        df_grouped = df.drop(val_set).groupby(['subject_id'])[list(result.keys())[2:]].sum().sample(frac=val_split)
+        df_grouped = df.drop(val_set).groupby(['subject_id'])[list(result.keys())[2:]].sum().sample(
+            frac=val_split)
         df_train = df[~df['subject_id'].isin(df_grouped.index)]
         df_train['split'] = [0] * len(df_train)
         df_val = df[df['subject_id'].isin(df_grouped.index)]
@@ -188,30 +209,31 @@ label_extractors = {
 }
 
 
-def extract_labels(dataset_path: str, output_path: str) -> Optional[str]:
+def extract_labels(dataset_path: str) -> Optional[str]:
     """
     Extract the labels from the given dataset and bring it in a uniform format.
     @param dataset_path: The path to the dataset.
-    @param output_path: The path to save the results.
     @return: The path to the csv file or None if no extractor could be found.
     """
     path_parts = dataset_path.split(os.sep)
     for dataset_name in path_parts:
         if dataset_name in label_extractors:
             dataset_path = dataset_path[:dataset_path.index(dataset_name) + len(dataset_name)]
-            os.makedirs(output_path, exist_ok=True)
             logger.debug(f'Extracting labels for {dataset_name}...')
             # csv_file =
             extractor_class = label_extractors[dataset_name]
             extractor = extractor_class(dataset_path)
             df = extractor()
-            csv_file = os.path.join(output_path, 'labels.csv')
+            csv_file = os.path.join(dataset_path, 'labels.csv')
             df.to_csv(csv_file)
-            logger.info(f'Extracted labels from {dataset_name} to {output_path}')
+            logger.info(f'Extracted labels from {dataset_name} to {dataset_path}')
             df_anaylser = df.drop(['image_path'], axis=1)
-            logger.debug(f'Meta-Data:\n{df_anaylser.drop(["split"], axis=1).sum()}')
-            logger.debug(f'Train-Split:\n{df_anaylser[df_anaylser["split"] == 0].drop(["split"], axis=1).sum()}')
-            logger.debug(f'Validation-Split:\n{df_anaylser[df_anaylser["split"] == 1].drop(["split"], axis=1).sum()}')
+            meta_data = df_anaylser.drop(["split"], axis=1).sum()
+            logger.debug(f'Meta-Data:\n{meta_data}')
+            train_split = df_anaylser[df_anaylser["split"] == 0].drop(["split"], axis=1).sum()
+            logger.debug(f'Train-Split:\n{train_split}')
+            val_split = df_anaylser[df_anaylser["split"] == 1].drop(["split"], axis=1).sum()
+            logger.debug(f'Validation-Split:\n{val_split}')
             return csv_file
     logger.warning(f'No label extractor found for {dataset_path}')
     return None

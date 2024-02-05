@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import json
 import os
 from typing import List, Tuple
@@ -9,14 +13,14 @@ from PIL import Image
 from loguru import logger
 from sklearn.utils import compute_class_weight
 from torch import Tensor
-from torch.utils.data import DataLoader
+from torch.utils.data import Dataset
 from torchvision.transforms import Compose
 
 from lib.datasets import DatasetSplit
 from lib.utils import glob_dir
 
 
-class LabeledDataset(torch.utils.data.Dataset):
+class LabeledDataset(Dataset):
     """
     The LabeledDataset wraps a folder structure of a dataset with train, val, and test folders
     and the corresponding labels.csv with the meta information.
@@ -39,7 +43,8 @@ class LabeledDataset(torch.utils.data.Dataset):
         file_names_found = [os.path.basename(f).split('-')[-1] for f in files_found]
         logger.debug(f'Files found: {len(file_names_found)}')
         # Extract base name from image_path in meta-data
-        self.meta_data['image_path'] = self.meta_data['image_path'].apply(lambda p: p.split('\\')[-1].split('/')[-1])
+        self.meta_data['image_path'] = self.meta_data['image_path'].apply(
+            lambda p: p.split('\\')[-1].split('/')[-1])
         # Filter for all available images in files_found
         self.meta_data = self.meta_data[self.meta_data['image_path'].isin(file_names_found)]
         logger.debug(f'Files not available: {len(file_names_found) - len(self.meta_data)}')
@@ -48,7 +53,8 @@ class LabeledDataset(torch.utils.data.Dataset):
         # Extract labels from meta-data
         self.labels = list(self.meta_data.drop(['image_path', 'split'], axis=1).columns.values)[1:]
         self.transforms = transforms
-        logger.info(f'Finished "{os.path.basename(data_dir)}" Dataset (total={len(self.meta_data)}) Setup!')
+        logger.info(
+            f'Finished "{os.path.basename(data_dir)}" Dataset (total={len(self.meta_data)}) Setup')
 
     def __len__(self) -> int:
         return len(self.meta_data)
@@ -87,17 +93,22 @@ class LabeledDataset(torch.utils.data.Dataset):
         Compute the class weights for the dataset.
         @return: The class weights as tensor.
         """
-        logger.debug(f'Compute class weights with {self.num_classes} classes: {", ".join(self.classes)}')
+        logger.debug(
+            f'Compute class weights with {self.num_classes} classes: {", ".join(self.classes)}')
         logger.debug(f'Sum of samples per class:\n{self.meta_data[self.labels].sum(axis=0)}')
         if self.is_multi_label:
             y = self.meta_data[self.labels].to_numpy()
             class_weight = np.empty([self.num_classes, 2])
             for idx in range(self.num_classes):
-                class_weight[idx] = compute_class_weight(class_weight='balanced', classes=[0., 1.], y=y[:, idx])
+                class_weight[idx] = compute_class_weight(class_weight='balanced', classes=[0., 1.],
+                                                         y=y[:, idx])
             class_weight = np.mean(class_weight, axis=1)
         else:
             y = np.argmax(self.meta_data[self.labels].to_numpy(), axis=1)
-            class_weight = compute_class_weight(class_weight='balanced', classes=range(self.num_classes), y=y)
-        class_weights_per_label = {self.labels[idx]: class_weight[idx] for idx in range(len(self.labels))}
-        logger.debug(f'Class-Weights for each Label={json.dumps(class_weights_per_label, indent=3)}')
+            class_weight = compute_class_weight(class_weight='balanced',
+                                                classes=range(self.num_classes), y=y)
+        class_weights_per_label = {self.labels[idx]: class_weight[idx] for idx in
+                                   range(len(self.labels))}
+        logger.debug(
+            f'Class-Weights for each Label={json.dumps(class_weights_per_label, indent=3)}')
         return torch.from_numpy(class_weight)

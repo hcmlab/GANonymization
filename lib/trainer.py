@@ -1,3 +1,7 @@
+"""
+Created by Fabio Hellmann.
+"""
+
 import os
 import random
 
@@ -18,7 +22,7 @@ def setup_torch_device(device: int, seed: int) -> str:
     @return: The string of the device.
     """
     torch_device = f'cuda:{device}' if device >= 0 else 'cpu'
-    logger.info(f"Using {'GPU.' if device >= 0 else 'CPU, as was explicitly requested, or as GPU is not available.'}")
+    logger.info(f"Using {'GPU' if device >= 0 else 'CPU'}.")
     np.random.seed(seed)
     torch.manual_seed(seed)
     random.seed(seed)
@@ -36,14 +40,16 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
           checkpoint_interval: int = None) -> pytorch_lightning.Trainer:
     """
     Run the lightning model.
-    :param model: The model to train.
-    :param num_epoch: The number of epochs to train.
-    :param device: The device to work on.
-    :param save_top_k: Save top k checkpoints - or every epoch if k=0.
-    :param monitor: The metric variable to monitor.
-    :param metric_mode: The mode of the metric to decide which checkpoint to choose (min or max).
-    :param early_stop_n: Stops training after n epochs of no improvement - default is deactivated.
-    :param checkpoint_interval: The interval a checkpoint should be saved if save_top_k is 0.
+    @param model: The model to train.
+    @param log_dir: The directory to save the logs.
+    @param models_dir: The directory to save the models.
+    @param num_epoch: The number of epochs to train.
+    @param device: The device to work on.
+    @param save_top_k: Save top k checkpoints - or every epoch if k=0.
+    @param monitor: The metric variable to monitor.
+    @param metric_mode: The mode of the metric to decide which checkpoint to choose (min or max).
+    @param early_stop_n: Stops training after n epochs of no improvement - default is deactivated.
+    @param checkpoint_interval: The interval a checkpoint should be saved if save_top_k is 0.
     """
     model_name = model.__class__.__name__
     os.makedirs(models_dir, exist_ok=True)
@@ -51,15 +57,18 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
     tb_logger = TensorBoardLogger(log_dir, name='', version='')
     callbacks = [LearningRateMonitor()]
     if save_top_k > 0:
-        callbacks.append(ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{' + monitor + ':.6f}',
-                                         save_top_k=save_top_k, monitor=monitor, mode=metric_mode))
+        callbacks.append(
+            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{' + monitor + ':.6f}',
+                            save_top_k=save_top_k, monitor=monitor, mode=metric_mode))
     else:
         callbacks.append(
-            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{step}', monitor='step', mode='max',
+            ModelCheckpoint(dirpath=models_dir, filename='{epoch}-{step}', monitor='step',
+                            mode='max',
                             save_top_k=-1, every_n_train_steps=checkpoint_interval))
     if early_stop_n > 0:
         callbacks.append(
-            EarlyStopping(monitor=monitor, min_delta=0.00, patience=early_stop_n, verbose=False, mode=metric_mode))
+            EarlyStopping(monitor=monitor, min_delta=0.00, patience=early_stop_n, verbose=False,
+                          mode=metric_mode))
 
     trainer = pytorch_lightning.Trainer(deterministic=True,
                                         accelerator="gpu" if device >= 0 else "cpu",
@@ -71,7 +80,8 @@ def setup(model: LightningModule, log_dir: str, models_dir: str, num_epoch: int,
                                         log_every_n_steps=1,
                                         detect_anomaly=True)
     logger.info(
-        f'Train {model_name} for {num_epoch} epochs and save logs under {tb_logger.log_dir} and models under {models_dir}')
+        f'Train {model_name} for {num_epoch} epochs and save logs under {tb_logger.log_dir} '
+        f'and models under {models_dir}')
     model.train()
     model.to(device)
     return trainer

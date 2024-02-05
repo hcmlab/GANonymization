@@ -1,31 +1,30 @@
+"""
+Created by Fabio Hellmann.
+"""
+from typing import List
+
+import numpy as np
 from retinaface import RetinaFace
 
 
 class FaceCrop:
     """
-    The FaceCrop transformer is based on the RetinaFace library which extracts all available faces from the given image.
+    The FaceCrop transformer is based on the RetinaFace library which extracts all available faces
+    from the given image.
     """
 
-    def __init__(self, align: bool, multiple_faces: bool):
+    def __init__(self, align: bool):
         """
         @param align: Whether the face should be aligned.
-        @param multiple_faces: Whether multiple faces should be detected.
         """
         self.align = align
-        self.multiple_faces = multiple_faces
 
-    def __call__(self, pic):
+    def __call__(self, pic: np.ndarray) -> List[np.ndarray]:
         """
-        @param pic (PIL Image or numpy.ndarray): Image to be converted to cropped faces.
-        @return: numpy.ndarray: Converted image.
+        @param pic (numpy.ndarray): Image to be converted to cropped faces.
+        @return: List[numpy.ndarray]: Converted image.
         """
-        faces = [i[:, :, ::-1] for i in RetinaFace.extract_faces(pic, align=self.align)]
-        if not self.multiple_faces:
-            if len(faces) > 0:
-                return faces[0]
-            else:
-                return None
-        return faces
+        return [i[:, :, ::-1] for i in RetinaFace.extract_faces(pic, align=self.align)]
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"

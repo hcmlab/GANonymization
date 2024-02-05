@@ -1,3 +1,8 @@
+"""
+Create by Fabio Hellmann - based on Erik Linder-Noren's implementation:
+https://github.com/eriklindernoren/PyTorch-GAN/blob/master/implementations/pix2pix/models.py
+"""
+
 import os.path
 
 import pytorch_lightning
@@ -26,7 +31,7 @@ def weights_init_normal(m):
 
 class UNetDown(nn.Module):
     def __init__(self, in_size, out_size, normalize=True, dropout=0.0):
-        super(UNetDown, self).__init__()
+        super().__init__()
         layers = [nn.Conv2d(in_size, out_size, 4, 2, 1, bias=False)]
         if normalize:
             layers.append(nn.InstanceNorm2d(out_size))
@@ -41,7 +46,7 @@ class UNetDown(nn.Module):
 
 class UNetUp(nn.Module):
     def __init__(self, in_size, out_size, dropout=0.0):
-        super(UNetUp, self).__init__()
+        super().__init__()
         layers = [
             nn.ConvTranspose2d(in_size, out_size, 4, 2, 1, bias=False),
             nn.InstanceNorm2d(out_size),
@@ -61,7 +66,7 @@ class UNetUp(nn.Module):
 
 class GeneratorUNet(nn.Module):
     def __init__(self, in_channels=3, out_channels=3):
-        super(GeneratorUNet, self).__init__()
+        super().__init__()
 
         self.down1 = UNetDown(in_channels, 64, normalize=False)
         self.down2 = UNetDown(64, 128)
@@ -115,7 +120,7 @@ class GeneratorUNet(nn.Module):
 
 class Discriminator(nn.Module):
     def __init__(self, in_channels=3):
-        super(Discriminator, self).__init__()
+        super().__init__()
 
         def discriminator_block(in_filters, out_filters, normalization=True):
             """Returns downsampling layers of each discriminator block"""
@@ -134,9 +139,9 @@ class Discriminator(nn.Module):
             nn.Conv2d(512, 1, 4, padding=1, bias=False)
         )
 
-    def forward(self, img_A, img_B):
+    def forward(self, img_a, img_b):
         # Concatenate image and condition image by channels to produce input
-        img_input = torch.cat((img_A, img_B), 1)
+        img_input = torch.cat((img_a, img_b), 1)
         return self.model(img_input)
 
 
@@ -147,8 +152,8 @@ class Discriminator(nn.Module):
 
 class Pix2Pix(pytorch_lightning.LightningModule):
     def __init__(self, data_dir: str, models_dir: str, output_dir: str, n_epochs: int,
-                 dataset_name: str, batch_size: int, lr: float, b1: float, b2: float, n_cpu: int, img_size: int,
-                 device: int):
+                 dataset_name: str, batch_size: int, lr: float, b1: float, b2: float, n_cpu: int,
+                 img_size: int, device: int):
         """
         Create a Pix2Pix Network.
         @param data_dir: The directory of the data.
@@ -180,9 +185,6 @@ class Pix2Pix(pytorch_lightning.LightningModule):
         self.n_cpu = n_cpu
         self.img_size = img_size
 
-        self.out_dir = os.path.join(output_dir, dataset_name)
-        os.makedirs(self.out_dir, exist_ok=True)
-
         self.transforms_ = [
             transforms.Resize((img_size, img_size)),
             transforms.ToTensor(),
@@ -208,29 +210,29 @@ class Pix2Pix(pytorch_lightning.LightningModule):
     def training_step(self, batch):
         optimizer_g, optimizer_d = self.optimizers()
         # Model inputs
-        real_A = batch["B"]
-        real_B = batch["A"]
+        real_a = batch["B"]
+        real_b = batch["A"]
         # Calculate output of image discriminator (PatchGAN)
         patch = (1, self.img_size // 2 ** 4, self.img_size // 2 ** 4)
         # Adversarial ground truths
-        valid = torch.ones((real_A.size(0), *patch), requires_grad=False).to(self.device)
-        fake = torch.zeros((real_A.size(0), *patch), requires_grad=False).to(self.device)
+        valid = torch.ones((real_a.size(0), *patch), requires_grad=False).to(self.device)
+        fake = torch.zeros((real_a.size(0), *patch), requires_grad=False).to(self.device)
         # ------------------
         #  Train Generators
         # ------------------
         self.toggle_optimizer(optimizer_g)
         # GAN loss
-        fake_B = self.generator(real_A)
-        pred_fake = self.discriminator(fake_B, real_A)
-        loss_GAN = self.criterion_GAN(pred_fake, valid)
+        fake_b = self.generator(real_a)
+        pred_fake = self.discriminator(fake_b, real_a)
+        loss_gan = self.criterion_GAN(pred_fake, valid)
         # Pixel-wise loss
-        loss_pixel = self.criterion_pixelwise(fake_B, real_B)
+        loss_pixel = self.criterion_pixelwise(fake_b, real_b)
         # Total loss
-        loss_G = loss_GAN + self.lambda_pixel * loss_pixel
-        self.log('G loss', loss_G, prog_bar=True)
+        loss_g = loss_gan + self.lambda_pixel * loss_pixel
+        self.log('G loss', loss_g, prog_bar=True)
         self.log('G pixel', loss_pixel, prog_bar=True)
-        self.log('G adv', loss_GAN, prog_bar=True)
-        self.manual_backward(loss_G)
+        self.log('G adv', loss_gan, prog_bar=True)
+        self.manual_backward(loss_g)
         optimizer_g.step()
         optimizer_g.zero_grad()
         self.untoggle_optimizer(optimizer_g)
@@ -239,39 +241,43 @@ class Pix2Pix(pytorch_lightning.LightningModule):
         # ---------------------
         self.toggle_optimizer(optimizer_d)
         # Real loss
-        pred_real = self.discriminator(real_B, real_A)
+        pred_real = self.discriminator(real_b, real_a)
         loss_real = self.criterion_GAN(pred_real, valid)
         # Fake loss
-        fake_B = self.generator(real_A)
-        pred_fake = self.discriminator(fake_B.detach(), real_A)
+        fake_b = self.generator(real_a)
+        pred_fake = self.discriminator(fake_b.detach(), real_a)
         loss_fake = self.criterion_GAN(pred_fake, fake)
         # Total loss
-        loss_D = 0.5 * (loss_real + loss_fake)
-        self.log('D loss', loss_D, prog_bar=True)
-        self.manual_backward(loss_D)
+        loss_d = 0.5 * (loss_real + loss_fake)
+        self.log('D loss', loss_d, prog_bar=True)
+        self.manual_backward(loss_d)
         optimizer_d.step()
         optimizer_d.zero_grad()
         self.untoggle_optimizer(optimizer_d)
 
     def validation_step(self, batch, batch_idx):
         if batch_idx == 0:
-            real_A = batch["B"]
-            real_B = batch["A"]
-            fake_B = self.generator(real_A)
-            img_sample = torch.cat((real_B.data, real_A.data, fake_B.data), -2)
-            save_image(img_sample, os.path.join(self.out_dir, f'{self.current_epoch}-{self.global_step}.png'), nrow=5,
-                       normalize=True)
+            real_a = batch["B"]
+            real_b = batch["A"]
+            fake_b = self.generator(real_a)
+            img_sample = torch.cat((real_b.data, real_a.data, fake_b.data), -2)
+            save_image(img_sample,
+                       os.path.join(self.out_dir, f'{self.current_epoch}-{self.global_step}.png'),
+                       nrow=5, normalize=True)
             grid = make_grid(img_sample, nrow=5, normalize=True)
             self.logger.experiment.add_image('images', grid, self.global_step)
 
     def configure_optimizers(self):
-        optimizer_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr, betas=(self.b1, self.b2))
-        optimizer_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr, betas=(self.b1, self.b2))
+        optimizer_g = torch.optim.Adam(self.generator.parameters(), lr=self.lr,
+                                       betas=(self.b1, self.b2))
+        optimizer_d = torch.optim.Adam(self.discriminator.parameters(), lr=self.lr,
+                                       betas=(self.b1, self.b2))
         return [optimizer_g, optimizer_d], []
 
     def train_dataloader(self):
         return DataLoader(
-            ImageDataset(os.path.join(self.data_dir, self.dataset_name), transforms_=self.transforms_),
+            ImageDataset(os.path.join(self.data_dir, self.dataset_name),
+                         transforms_=self.transforms_),
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.n_cpu,
@@ -279,7 +285,8 @@ class Pix2Pix(pytorch_lightning.LightningModule):
 
     def val_dataloader(self):
         return DataLoader(
-            ImageDataset(os.path.join(self.data_dir, self.dataset_name), transforms_=self.transforms_, mode="val"),
+            ImageDataset(os.path.join(self.data_dir, self.dataset_name),
+                         transforms_=self.transforms_, mode="val"),
             batch_size=10,
             shuffle=True,
             num_workers=self.n_cpu,
