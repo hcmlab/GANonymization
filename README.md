@@ -6,7 +6,6 @@ ______________________________________________________________________
 #### A GAN-based Face Anonymization Framework for Preserving Emotional Expressions
 ______________________________________________________________________
 
-[![Unit-Tests](https://github.com/hcmlab/GANonymization/actions/workflows/python-app.yml/badge.svg?branch=main&event=push)](https://github.com/hcmlab/GANonymization/actions/workflows/python-app.yml)
 [![PyLint-Tests](https://github.com/hcmlab/GANonymization/actions/workflows/pylint.yml/badge.svg?branch=main&event=push)](https://github.com/hcmlab/GANonymization/actions/workflows/pylint.yml)
 
 [**Paper**](https://dl.acm.org/doi/10.1145/3641107)

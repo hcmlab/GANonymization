@@ -127,6 +127,7 @@ disable=
     no-name-in-module,
     no-init,
     no-else-return,
+    no-value-for-parameter
     arguments-differ,
     unpacking-non-sequence,
     not-callable,
