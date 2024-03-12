@@ -10,13 +10,13 @@ from mediapipe.python.solutions.drawing_utils import DrawingSpec, WHITE_COLOR
 
 class FacialLandmarks478:
     """
-    Extract 468 facial landmark points from the picture and return it in a 2-dimensional picture.
+    Extract 478 facial landmark points from the picture and return it in a 2-dimensional picture.
     """
 
     def __call__(self, pic: np.ndarray) -> np.ndarray:
         """
         @param pic (numpy.ndarray): Image to be converted to a facial landmark image
-        with 468 points.
+        with 478 points.
         @return: numpy.ndarray: Converted image.
         """
         point_image = np.zeros(pic.shape, np.uint8)
