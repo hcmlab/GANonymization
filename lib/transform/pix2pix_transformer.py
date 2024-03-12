@@ -39,7 +39,7 @@ class Pix2PixTransformer:
         pic_transformed = self.transforms_(pic)
         pic_transformed_device = pic_transformed.to(self.device)
         pic_transformed_device_batched = torch.unsqueeze(pic_transformed_device, dim=0)
-        return self.model(pic_transformed_device_batched).detach().cpu().numpy()
+        return self.model(pic_transformed_device_batched)
 
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}"
