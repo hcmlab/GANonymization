@@ -12,7 +12,9 @@ import pandas as pd
 import pytorch_lightning
 from loguru import logger
 from sklearn.model_selection import train_test_split
+import torch
 from torchvision.transforms import RandomHorizontalFlip, Compose
+from torchvision.transforms import transforms
 from tqdm import tqdm
 
 from lib.datasets import DatasetSplit
@@ -172,8 +174,11 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
         img = ZeroPaddingResize(img_size)(img)
         img = FacialLandmarks478()(img)
         img = Pix2PixTransformer(model_file, img_size, device)(img)
+        img = torch.squeeze(img)
+        img = (img + 1) / 2
+        pil_img = transforms.ToPILImage()(img)
         os.makedirs(os.path.dirname(output_file), exist_ok=True)
-        cv2.imwrite(output_file, img)
+        pil_img.save(output_file)
 
 
 def anonymize_directory(model_file: str, input_directory: str, output_directory: str,
