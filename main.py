@@ -172,15 +172,16 @@ def anonymize_image(model_file: str, input_file: str, output_file: str, img_size
     if img is not None:
         faces = FaceCrop(align)(img)
         for idx, f in enumerate(faces):
-          img = f
-          img = ZeroPaddingResize(img_size)(img)
-          img = FacialLandmarks478()(img)
-          img = Pix2PixTransformer(model_file, img_size, device)(img)
-          img = torch.squeeze(img)
-          img = (img + 1) / 2
-          pil_img = transforms.ToPILImage()(img)
-          os.makedirs(os.path.dirname(output_file), exist_ok=True)
-          pil_img.save(os.path.join(os.path.dirname(output_file), f'{idx}_{os.path.basename(output_file)}'))
+            img = f
+            img = ZeroPaddingResize(img_size)(img)
+            img = FacialLandmarks478()(img)
+            img = Pix2PixTransformer(model_file, img_size, device)(img)
+            img = torch.squeeze(img)
+            img = (img + 1) / 2
+            pil_img = transforms.ToPILImage()(img)
+            os.makedirs(os.path.dirname(output_file), exist_ok=True)
+            pil_img.save(os.path.join(os.path.dirname(output_file), 
+                                      f'{idx}_{os.path.basename(output_file)}'))
 
 
 def anonymize_directory(model_file: str, input_directory: str, output_directory: str,
